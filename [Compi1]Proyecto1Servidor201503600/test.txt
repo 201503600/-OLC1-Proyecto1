@@ -1,0 +1,22 @@
+import clas.class.class.*;
+public Class prueba{
+	System.out.println("vasdf");
+    //asdfas
+	public String valor1 ;
+	public int pruebaFuncion(String val){
+
+		System.out.println("vasdf");
+		String valor_funcion;
+		return 23;
+	}
+	public void pruebaMetodo(String valor, String vas , String tercero){
+
+	String valor2 ;
+	String valor_metodo;
+
+	}
+	
+	public String valor3;
+	public String valor4;
+	//3variables
+}

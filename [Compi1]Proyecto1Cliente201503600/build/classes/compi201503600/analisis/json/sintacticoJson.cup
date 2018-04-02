@@ -1,0 +1,182 @@
+package compi201503600.analisis.json;
+
+import java_cup.runtime.*;
+import java.io.FileReader;
+
+//PARSER 
+parser code
+{://Codigo visible
+
+    public void syntax_error(Symbol s){
+        System.out.println("Error R de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        System.out.println("Error NR de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
+    }
+
+    /* Reporte de error encontrado. */
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {                
+                m.append(" in line "+(s.left+1));
+                if (s.right >= 0)
+                    m.append(", column "+(s.right+1));
+            }
+        }
+        m.append(" : "+message);
+        System.err.println(m);
+    }
+   
+    /* Cuando se encuentra un error de donde el sistema no puede
+        recuperarse, se lanza un error fatal. Se despliega el mensaje
+        de error y se finaliza la ejecucion. */
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+    /* Metodo main para garantizar la ejecucion del analizador
+       lexico y sintactico, ademas que se pase como parametro la tabla
+       de simbolos correspondiente. */
+    public static void main(String[] args){
+        try {
+            ScannerSintaxJson asin = new ScannerSintaxJson(
+                    new ScannerLexJson( new FileReader(args[0])));
+            Object result = asin.parse().value;
+            System.out.println("\n*** Resultados finales ***");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+:}
+
+action code
+{:
+:}
+
+
+
+   
+/* ------------Declaracion de simbolos terminales y no terminales---------- */
+   
+/* Terminales (tokens obtenidos por el analizador lexico).  
+
+   Terminales que no tienen un valor son listados primero, los terminales que
+   tienen un valor como los enteros son listados en la segunda o demas lineas. */
+terminal    LLAVEIZQ, LLAVEDER, CORCHIZQ, CORCHDER, DPUNTOS, COMA, SCORE, CLASES, VARIABLES, METODOS, COMENTARIOS, NOMBRE, TIPO, FUNCION, CLASE, PARAMETROS, 
+            TEXTO, ENTERO, DECIMAL, ID, CADENA;
+   
+/* No terminales usados en la seccion gramatical. 
+
+   Primero se lista los no terminales que tienen un valor Object y despues
+   se lista los no terminales que tienen un entero. Un Object se refiere a que
+   no tienen tipo, pudiendo ser entero o String. */
+non terminal Object     S0, INICIO, SENTSJSON, SENTJSON, SENTSSCORE, SENTSCLASS, SENTSCLASES, SENTCLASES, SENTSVARS, SENTSVAR, SENTVAR, PARAMSVAR, PARAMVAR,
+                        SENTSMETODOS, SENTSMET, SENTMET, PARAMSMET, PARAMMET, SENTSCOMMENTS, SENTSCOMMENT, SENTCOMMENT;
+   
+
+/* -------------Seccion de predencia y asociacion de los terminales----------- */
+    /*  
+  precedence left OPAND, OPOR;
+  precedence right OPNOT;
+  precedence left OPMEN, OPMAY, OPMENIGUAL, OPMAYIGUAL, OPIGUAL, OPDISTINTO;
+  precedence left OPSUMA, OPRESTA;
+  precedence left OPMULT, OPDIV;
+  precedence left OPMODULO;
+    */
+
+/* ------------------- Seccion de la gramatica ------------------------ */
+
+S0 ::=  INICIO
+        ;
+
+INICIO ::=  LLAVEIZQ SENTSJSON LLAVEDER
+            | error LLAVEDER
+            ;
+
+SENTSJSON ::=   SENTSJSON COMA SENTJSON
+                | SENTJSON
+                ;
+
+SENTJSON ::=    SCORE DPUNTOS CORCHIZQ SENTSSCORE CORCHDER
+                | CLASES DPUNTOS CORCHIZQ SENTSCLASS CORCHDER
+                | VARIABLES DPUNTOS CORCHIZQ SENTSVARS CORCHDER
+                | METODOS DPUNTOS CORCHIZQ SENTSMETODOS CORCHDER
+                | COMENTARIOS DPUNTOS CORCHIZQ SENTSCOMMENTS CORCHDER
+                | error CORCHDER
+                ;
+
+SENTSSCORE ::=  ENTERO
+                | DECIMAL
+                ;
+
+SENTSCLASS ::=  SENTSCLASES
+                | 
+                ;
+
+SENTSCLASES ::= SENTSCLASES COMA SENTCLASES
+                | SENTCLASES
+                ;
+
+SENTCLASES ::=  LLAVEIZQ NOMBRE DPUNTOS CADENA LLAVEDER
+                | error LLAVEDER
+                ;
+
+SENTSVARS ::=   SENTSVAR
+                |
+                ;
+
+SENTSVAR ::=    SENTSVAR COMA SENTVAR
+                | SENTVAR
+                ;
+
+SENTVAR ::= LLAVEIZQ PARAMSVAR LLAVEDER
+            | error LLAVEDER
+            ;
+
+PARAMSVAR ::=   PARAMSVAR COMA PARAMVAR
+                | PARAMVAR
+                ;
+
+PARAMVAR ::=    NOMBRE DPUNTOS CADENA
+                | TIPO DPUNTOS CADENA
+                | FUNCION DPUNTOS CADENA
+                | CLASE DPUNTOS CADENA
+                ;
+
+SENTSMETODOS ::=    SENTSMET
+                    |
+                    ;
+
+SENTSMET ::=    SENTSMET COMA SENTMET
+                | SENTMET
+                ;
+
+SENTMET ::= LLAVEIZQ PARAMSMET LLAVEDER
+            | error LLAVEDER
+            ;
+
+PARAMSMET ::=   PARAMSMET COMA PARAMMET
+                | PARAMMET
+                ;
+
+PARAMMET ::=    NOMBRE DPUNTOS CADENA
+                | TIPO DPUNTOS CADENA
+                | PARAMETROS DPUNTOS CADENA
+                ;
+
+SENTSCOMMENTS ::=   SENTSCOMMENT
+                    | 
+                    ;
+
+SENTSCOMMENT ::=    SENTSCOMMENT COMA SENTCOMMENT
+                    | SENTCOMMENT
+                    ;
+
+SENTCOMMENT ::= LLAVEIZQ TEXTO DPUNTOS CADENA LLAVEDER
+                | error LLAVEDER
+                ;

@@ -1,0 +1,495 @@
+ 
+   
+/* ---------------Seccion de declaraciones preliminares--------------------*/
+package compi201503600.analisis.java;
+
+/* Import the class java_cup.runtime.*  */
+import java_cup.runtime.*;
+import java.io.FileReader;
+import compi201503600.beans.*;
+   
+/* Codigo del parser, se copia integramente a la clase final.
+    Agregamos el manejo de errores. */
+parser code {:
+
+
+    public Clase nuevaClase = new Clase();
+    public Metodo nuevoMetodo = null;
+
+    public Clase getNuevaClase(){
+      return nuevaClase;
+    }
+
+    public String getAmbito(){
+      if (nuevoMetodo == null)
+        return "global";
+      else
+        return nuevoMetodo.getNombre();
+    }
+
+    public Object stack(int position){
+      return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+    
+    public void syntax_error(Symbol s){
+        System.out.println("Error R de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        System.out.println("Error NR de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
+    }
+
+    /* Metodo main para garantizar la ejecucion del analizador
+       lexico y sintactico, ademas que se pase como parametro la tabla
+       de simbolos correspondiente. */
+    public static void main(String[] args){
+        try {
+            ScannerSintaxJava asin = new ScannerSintaxJava(
+                    new ScannerLexJava( new FileReader(args[0])));
+            Object result = asin.parse().value;
+            System.out.println("\n*** Resultados finales ***");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+:};
+   
+   
+/* ------------Declaracion de simbolos terminales y no terminales---------- */
+   
+/* Terminales (tokens obtenidos por el analizador lexico).  
+
+   Terminales que no tienen un valor son listados primero, los terminales que
+   tienen un valor como los enteros son listados en la segunda o demas lineas. */
+terminal String   ID, COMENTARIO, STRING_LITERAL;
+terminal           PARENIZQ, PARENDER, CORCHIZQ, CORCHDER, LLAVEIZQ, LLAVEDER, PCOMA, DPUNTOS, COMA, PUNTO, IGUAL, MASIGUAL, MENIGUAL, MULTIGUAL, OPSUMA, OPRESTA, 
+                   OPMULT, OPDIV, OPMODULO, OPINCREMENT, OPDECREMENT, OPMEN, OPMAY, OPMENIGUAL, OPMAYIGUAL, OPIGUAL, OPDISTINTO, OPAND, OPOR, OPNOT, PACKAGE,
+                   IMPORTA, PRIVATE, PUBLIC, PROTECTED, FINAL, CLASE, THIS, NEW, NULL, TVOID, TINT, TBOOLEAN, TSTRING, TCHAR, TDOUBLE, TOBJECT, IF, ELSE, FOR, 
+                   WHILE, DO, SWITCH, CASE, DEFAULT, BREAK, RETURN, SYSTEM, OUT, PRINT, STATIC, MAIN, ENTERO, DECIMAL, ARGS;
+   
+/* No terminales usados en la seccion gramatical. 
+
+   Primero se lista los no terminales que tienen un valor Object y despues
+   se lista los no terminales que tienen un entero. Un Object se refiere a que
+   no tienen tipo, pudiendo ser entero o String. */
+non terminal String     TIPODATO, LISTAID;
+non terminal Object     INIT, S0, EPS, INICIO, IMPORTACION, PAQUETE, TEXTPLANE, CLASEU, ACCESO, SENTSCLASE, SENTCLASE, GLOBAL, LOCAL, ASIGNA, INFPARAMETROS, 
+                        INFPARAM, COND, RELACIONAL, EXP, LLAMADA, LLAMAR, CONSTRUCTOR, DEFPARAMETROS, SENTSMET, SENTMET, ASIGNACION, OPASIGNACION, LISTAVAR,
+                        IFMET, IFELSEMET, SWITCHMET, CASOS, CASO, CASODEFAULT, FORMET, FORINICIO, SENTSMETCICLO, SENTMETCICLO, WHILEMET, 
+                        DOWHILEMET, IFMETCICLO, IFELSEMETCICLO, SWITCHMETCICLO, CASOSCICLO, CASOCICLO, CASODEFAULTCICLO, METMAIN, PARAMMAIN, METODO, FUNCION,
+                        SENTSFUN, SENTFUN, IFFUN, IFELSEFUN, SWITCHFUN, CASOSFUN, CASOFUN, CASODEFAULTFUN, FORFUN, SENTSFUNCICLO, SENTFUNCICLO,
+                        WHILEFUN, DOWHILEFUN, IFFUNCICLO, IFELSEFUNCICLO, SWITCHFUNCICLO, CASOSFUNCICLO, CASOFUNCICLO, CASODEFAULTFUNCICLO;
+   
+
+/* -------------Seccion de predencia y asociacion de los terminales----------- */
+   
+/*
+  Precedencia de los no terminales, no sirve con simbolos terminales.
+  Por eso no la usamos. Además indica si se asocia a izquierda o derecha.
+*/
+
+  precedence left OPAND, OPOR;
+  precedence right OPNOT;
+  precedence left OPMEN, OPMAY, OPMENIGUAL, OPMAYIGUAL, OPIGUAL, OPDISTINTO;
+  precedence left OPSUMA, OPRESTA;
+  precedence left OPMULT, OPDIV;
+  precedence left OPMODULO;
+
+
+/* ------------------- Seccion de la gramatica ------------------------ */
+   
+  start with INIT;
+
+   INIT ::= S0
+            ;
+
+    S0 ::=  S0 INICIO
+            | INICIO
+            ;
+
+    EPS ::= ;
+
+    INICIO ::=  PACKAGE PAQUETE PCOMA
+                | IMPORTA IMPORTACION PCOMA
+                | error PCOMA
+                | CLASEU
+                | COMENTARIO:comment        {:
+                                              parser.nuevaClase.setComentario(comment);
+                                            :}
+                ;
+
+    PAQUETE ::= PAQUETE PUNTO TEXTPLANE
+                | TEXTPLANE
+                ;
+
+    TEXTPLANE ::= ID
+                  | CLASE
+                  | TSTRING
+                  | MAIN
+                  ;
+
+    IMPORTACION ::= IMPORTACION PUNTO ID
+                    | IMPORTACION PUNTO OPMULT
+                    | ID
+                    ;
+
+    CLASEU ::=  ACCESO CLASE ID:id            {: 
+                                                parser.nuevaClase.setNombre(id); 
+                                              :}
+                LLAVEIZQ SENTSCLASE LLAVEDER
+                | error LLAVEDER
+                ;
+
+    ACCESO ::=  PRIVATE
+                | PUBLIC
+                | PROTECTED
+                | FINAL
+                ;
+
+    SENTSCLASE ::=  SENTSCLASE SENTCLASE
+                    | SENTCLASE
+                    ;
+
+    SENTCLASE ::= GLOBAL
+                  | CONSTRUCTOR
+                  | METMAIN
+                  | METODO
+                  | FUNCION
+                  | COMENTARIO:comment      {:
+                                              parser.nuevaClase.setComentario(comment);
+                                            :}
+                  | error PCOMA
+                  | error LLAVEDER
+                  ;
+
+    GLOBAL ::=  ACCESO LOCAL
+                ;
+
+    LOCAL ::= TIPODATO LISTAID PCOMA
+              ;
+
+    TIPODATO ::=  TINT                  {: RESULT = "int"; :}
+                  | TBOOLEAN            {: RESULT = "boolean"; :}
+                  | TSTRING             {: RESULT = "String"; :}
+                  | TCHAR               {: RESULT = "char"; :}
+                  | TDOUBLE             {: RESULT = "double"; :}
+                  | TOBJECT             {: RESULT = "object"; :}
+                  | ID:cad              {: RESULT = cad; :}
+                  ;
+
+    LISTAID ::= LISTAID COMA ID:id  {:
+                                      RESULT = (String)parser.stack(-2);
+                                      parser.nuevaClase.setVariable(new Variable(id, RESULT, parser.getAmbito(), parser.nuevaClase.getNombre()));
+                                    :} 
+                ASIGNA
+                | ID:id   {:
+                            RESULT = (String)parser.stack(-1);
+                            parser.nuevaClase.setVariable(new Variable(id, RESULT, parser.getAmbito(), parser.nuevaClase.getNombre()));
+                          :} 
+                  ASIGNA
+                ;
+
+    ASIGNA ::=  IGUAL COND
+                | IGUAL NEW ID PARENIZQ INFPARAMETROS PARENDER
+                | EPS
+                ;
+
+    INFPARAMETROS ::= INFPARAM
+                      | EPS
+                      ;
+
+    INFPARAM ::=  INFPARAM COMA COND
+                  | COND
+                  ;
+
+    COND ::=  COND OPOR COND
+              | COND OPAND COND
+              | OPNOT COND
+              | EXP RELACIONAL EXP
+              | EXP
+              ;
+
+    RELACIONAL ::=  OPIGUAL
+                    | OPDISTINTO
+                    | OPMAYIGUAL
+                    | OPMENIGUAL
+                    | OPMAY
+                    | OPMEN
+                    ;
+
+    EXP ::= EXP OPSUMA EXP
+            | EXP OPRESTA EXP
+            | EXP OPMULT EXP
+            | EXP OPDIV EXP
+            | EXP OPMODULO EXP
+            | OPRESTA EXP
+            | EXP OPINCREMENT
+            | EXP OPDECREMENT
+            | PARENIZQ COND PARENDER
+            | ENTERO
+            | DECIMAL
+            | STRING_LITERAL
+            | NULL
+            | LLAMADA
+            ; 
+
+    LLAMADA ::= THIS PUNTO LLAMAR
+                | LLAMAR
+                ;
+
+    LLAMAR ::=  LLAMAR PUNTO ID PARENIZQ INFPARAMETROS PARENDER
+                | LLAMAR PUNTO ID
+                | ID PARENIZQ INFPARAMETROS PARENDER
+                | ID
+                ;
+
+    CONSTRUCTOR ::= ACCESO ID PARENIZQ DEFPARAMETROS PARENDER LLAVEIZQ SENTSMET LLAVEDER
+                    ;
+
+    DEFPARAMETROS ::= DEFPARAMETROS COMA TIPODATO:tipo ID:id  {:
+                                                                parser.nuevoMetodo.setParametro(new Parametros(id, tipo));
+                                                              :}
+                      | TIPODATO:tipo ID:id   {:
+                                                parser.nuevoMetodo.setParametro(new Parametros(id, tipo));
+                                              :}
+                      | EPS
+                      ;
+
+    SENTSMET ::=  SENTSMET SENTMET
+                  | SENTMET
+                  ;
+
+    SENTMET ::= LOCAL
+                | ASIGNACION
+                | LLAMADA PCOMA
+                | IFMET
+                | FORMET
+                | WHILEMET
+                | DOWHILEMET
+                | SWITCHMET
+                | COMENTARIO:comment        {:
+                                              parser.nuevaClase.setComentario(comment);
+                                            :}
+                | SYSTEM PUNTO OUT PUNTO PRINT PARENIZQ COND PARENDER PCOMA
+                | error PCOMA
+                | error LLAVEDER
+                ;
+
+    ASIGNACION ::=  LLAMADA OPASIGNACION COND PCOMA
+                    | LLAMADA LISTAVAR PCOMA
+                    ;
+
+    OPASIGNACION ::=  MASIGUAL
+                      | MENIGUAL
+                      | MULTIGUAL
+                      ;
+
+    LISTAVAR ::=  LISTAVAR IGUAL COND
+                  | IGUAL COND
+                  ;
+
+    IFMET ::= IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMET LLAVEDER
+              | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMET LLAVEDER ELSE LLAVEIZQ SENTSMET LLAVEDER
+              | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMET LLAVEDER IFELSEMET
+              | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMET LLAVEDER IFELSEMET ELSE LLAVEIZQ SENTSMET LLAVEDER
+              ;
+
+    IFELSEMET ::= IFELSEMET ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMET LLAVEDER
+                  | ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMET LLAVEDER
+                  ;
+
+    FORMET ::=  FOR PARENIZQ FORINICIO PCOMA COND PCOMA COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER
+                ;
+
+    FORINICIO ::= TIPODATO ID IGUAL COND
+                  | ID IGUAL COND
+                  ;
+
+    SENTSMETCICLO ::= SENTSMETCICLO SENTMETCICLO
+                      | SENTMETCICLO
+                      ;
+
+    SENTMETCICLO ::=  LOCAL
+                      | ASIGNACION
+                      | LLAMADA PCOMA
+                      | IFMETCICLO
+                      | FORMET
+                      | WHILEMET
+                      | DOWHILEMET
+                      | SWITCHMETCICLO
+                      | COMENTARIO:comment        {:
+                                                    parser.nuevaClase.setComentario(comment);
+                                                  :}
+                      | SYSTEM PUNTO OUT PUNTO PRINT PARENIZQ COND PARENDER PCOMA
+                      | BREAK PCOMA
+                      | error PCOMA
+                      | error LLAVEDER
+                      ;
+
+    IFMETCICLO ::=  IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER
+                    | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER ELSE LLAVEIZQ SENTSMETCICLO LLAVEDER
+                    | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER IFELSEMETCICLO
+                    | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER IFELSEMETCICLO ELSE LLAVEIZQ SENTSMETCICLO LLAVEDER
+                    ;
+
+    IFELSEMETCICLO ::=  IFELSEMETCICLO ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER
+                        | ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER
+                        ;
+
+    SWITCHMETCICLO ::=  SWITCH PARENIZQ COND PARENDER LLAVEIZQ CASOSCICLO CASODEFAULTCICLO LLAVEDER
+                        ;
+
+    CASOSCICLO ::=  CASOSCICLO CASOCICLO
+                    | CASOCICLO
+                    ;
+
+    CASOCICLO ::= CASE COND DPUNTOS SENTSMETCICLO BREAK PCOMA 
+                  ;
+
+    CASODEFAULTCICLO  ::= DEFAULT DPUNTOS SENTSMETCICLO BREAK PCOMA
+                          | EPS
+                          ;
+
+    WHILEMET ::=  WHILE PARENIZQ COND PARENDER LLAVEIZQ SENTSMETCICLO LLAVEDER
+                  ;
+
+    DOWHILEMET ::=  DO LLAVEIZQ SENTSMETCICLO LLAVEDER WHILE PARENIZQ COND PARENDER PCOMA
+                    ;
+
+    SWITCHMET ::= SWITCH PARENIZQ COND PARENDER LLAVEIZQ CASOS CASODEFAULT LLAVEDER
+                  ;
+
+    CASOS ::= CASOS CASO
+              | CASO
+              ;
+
+    CASO ::=  CASE COND DPUNTOS SENTSMET BREAK PCOMA
+              ;
+
+    CASODEFAULT ::= DEFAULT DPUNTOS SENTSMET BREAK PCOMA
+                    | EPS
+                    ;
+
+    METMAIN ::= PUBLIC STATIC TVOID MAIN PARENIZQ PARAMMAIN PARENDER LLAVEIZQ SENTSMET LLAVEDER
+                ;
+
+    PARAMMAIN ::= TSTRING CORCHIZQ CORCHDER ARGS
+                  | TSTRING ARGS CORCHIZQ CORCHDER
+                  ;
+
+    METODO ::=  ACCESO TVOID ID:id  {:
+                                      parser.nuevoMetodo = new Metodo(id, "void");
+                                    :} 
+                PARENIZQ DEFPARAMETROS PARENDER LLAVEIZQ SENTSMET LLAVEDER  {: 
+                                                                              parser.nuevaClase.setMetodo(parser.nuevoMetodo);
+                                                                              parser.nuevoMetodo = null;
+                                                                            :}
+                ;
+
+    FUNCION ::= ACCESO TIPODATO:tipo ID:id  {:
+                                              parser.nuevoMetodo = new Metodo(id, tipo);
+                                            :} 
+                PARENIZQ DEFPARAMETROS PARENDER LLAVEIZQ SENTSFUN LLAVEDER  {: 
+                                                                              parser.nuevaClase.setMetodo(parser.nuevoMetodo);
+                                                                              parser.nuevoMetodo = null;
+                                                                            :}
+                ;
+
+    SENTSFUN ::=  SENTSFUN SENTFUN
+                  | SENTFUN
+                  ;
+
+    SENTFUN ::= LOCAL
+                | ASIGNACION
+                | LLAMADA PCOMA
+                | IFFUN
+                | FORFUN
+                | WHILEFUN
+                | DOWHILEFUN
+                | SWITCHFUN
+                | COMENTARIO:comment              {:
+                                                    parser.nuevaClase.setComentario(comment);
+                                                  :}
+                | SYSTEM PUNTO OUT PUNTO PRINT PARENIZQ COND PARENDER PCOMA
+                | RETURN COND PCOMA
+                | error PCOMA
+                | error LLAVEDER
+                ;
+
+    IFFUN ::= IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUN LLAVEDER
+              | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUN LLAVEDER ELSE LLAVEIZQ SENTSFUN LLAVEDER
+              | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUN LLAVEDER IFELSEFUN
+              | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUN LLAVEDER IFELSEFUN ELSE LLAVEIZQ SENTSFUN LLAVEDER
+              ;
+
+    IFELSEFUN ::= IFELSEFUN ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUN LLAVEDER
+                  | ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUN LLAVEDER
+                  ;
+
+    FORFUN ::=  FOR PARENIZQ FORINICIO PCOMA COND PCOMA COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER
+                ;
+
+    SENTSFUNCICLO ::= SENTSFUNCICLO SENTFUNCICLO
+                      | SENTFUNCICLO
+                      ;
+
+    SENTFUNCICLO ::=  LOCAL
+                      | ASIGNACION
+                      | LLAMADA PCOMA
+                      | IFFUNCICLO
+                      | FORFUN
+                      | WHILEFUN
+                      | DOWHILEFUN
+                      | SWITCHFUNCICLO
+                      | COMENTARIO:comment              {:
+                                                          parser.nuevaClase.setComentario(comment);
+                                                        :}
+                      | SYSTEM PUNTO OUT PUNTO PRINT PARENIZQ COND PARENDER PCOMA
+                      | RETURN COND PCOMA
+                      | BREAK PCOMA
+                      | error PCOMA
+                      | error LLAVEDER
+                      ;
+
+    IFFUNCICLO ::=  IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER
+                    | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER ELSE LLAVEIZQ SENTSFUNCICLO LLAVEDER
+                    | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER IFELSEFUNCICLO
+                    | IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER IFELSEFUNCICLO ELSE LLAVEIZQ SENTSFUNCICLO LLAVEDER
+                    ;
+
+    IFELSEFUNCICLO ::=  IFELSEFUNCICLO ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER
+                        | ELSE IF PARENIZQ COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER
+                        ;
+
+    SWITCHFUNCICLO ::=  SWITCH PARENIZQ COND PARENDER LLAVEIZQ CASOSFUNCICLO CASODEFAULTFUNCICLO LLAVEDER
+                        ;
+
+    CASOSFUNCICLO ::= CASOSFUNCICLO CASOFUNCICLO
+                      | CASOFUNCICLO
+                      ;
+
+    CASOFUNCICLO ::=  CASE COND DPUNTOS SENTSFUNCICLO BREAK PCOMA 
+                      ;
+
+    CASODEFAULTFUNCICLO  ::=  DEFAULT DPUNTOS SENTSFUNCICLO BREAK PCOMA
+                              ;
+
+    WHILEFUN ::=  WHILE PARENIZQ COND PARENDER LLAVEIZQ SENTSFUNCICLO LLAVEDER
+                  ;
+
+    DOWHILEFUN ::=  DO LLAVEIZQ SENTSFUNCICLO LLAVEDER WHILE PARENIZQ COND PARENDER PCOMA
+                    ;
+
+    SWITCHFUN ::= SWITCH PARENIZQ COND PARENDER LLAVEIZQ CASOSFUN CASODEFAULTFUN LLAVEDER
+                  ;
+
+    CASOSFUN ::=  CASOSFUN CASOFUN
+                  | CASOFUN
+                  ;
+
+    CASOFUN ::= CASE COND DPUNTOS SENTSFUN BREAK PCOMA
+                ;
+
+    CASODEFAULTFUN ::=  DEFAULT DPUNTOS SENTSFUN BREAK PCOMA
+                        | EPS
+                        ;

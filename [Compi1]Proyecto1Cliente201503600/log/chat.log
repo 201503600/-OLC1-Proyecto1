@@ -1,0 +1,47 @@
+2018-03-30 00:18:09,197 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-03-30 09:56:39,936 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-03-30 10:28:46,065 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-03-30 11:03:45,547 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-03-30 11:59:45,746 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-01 22:08:29,608 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:08:30,748 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:08:33,210 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:09:52,323 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:09:53,522 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:09:53,531 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:11:12,267 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:11:13,302 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:11:13,469 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:18:05,614 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:18:06,843 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:18:06,853 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:18:40,654 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:18:41,684 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:18:41,867 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:20:33,161 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:20:34,193 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:20:34,351 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:26:13,397 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:26:14,599 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:26:14,599 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:27:43,381 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:27:44,445 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:27:44,633 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:28:34,582 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:28:35,649 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:28:35,815 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:30:08,336 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:30:09,386 [main] ERROR compi201503600.cliente.VentanaCliente - No se ha podido conectar con el servidor (Connection refused: connect).
+2018-04-01 22:30:09,583 [main] ERROR compi201503600.cliente.ConexionServidor - El socket no se creo correctamente. 
+2018-04-01 22:32:49,187 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:33:48,242 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:37:57,895 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:38:31,667 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:38:42,576 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-01 22:59:53,131 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 13:04:59,753 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 13:10:57,942 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 13:11:13,000 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 13:14:16,836 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 13:14:18,495 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 14:10:42,935 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234

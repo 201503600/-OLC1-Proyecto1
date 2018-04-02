@@ -1,0 +1,335 @@
+package compi201503600.analisis.report;
+
+import java_cup.runtime.*;
+import java.io.FileReader;
+
+//PARSER 
+parser code
+{://Codigo visible
+
+    public void syntax_error(Symbol s){
+        System.out.println("Error R de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
+    }
+
+    public void unrecovered_syntax_error(Symbol s) throws java.lang.Exception{ 
+        System.out.println("Error NR de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
+    }
+
+    /* Reporte de error encontrado. */
+    public void report_error(String message, Object info) {
+        StringBuilder m = new StringBuilder("Error");
+        if (info instanceof java_cup.runtime.Symbol) {
+            java_cup.runtime.Symbol s = ((java_cup.runtime.Symbol) info);
+            if (s.left >= 0) {                
+                m.append(" in line "+(s.left+1));
+                if (s.right >= 0)
+                    m.append(", column "+(s.right+1));
+            }
+        }
+        m.append(" : "+message);
+        System.err.println(m);
+    }
+   
+    /* Cuando se encuentra un error de donde el sistema no puede
+        recuperarse, se lanza un error fatal. Se despliega el mensaje
+        de error y se finaliza la ejecucion. */
+    public void report_fatal_error(String message, Object info) {
+        report_error(message, info);
+        System.exit(1);
+    }
+
+    /* Metodo main para garantizar la ejecucion del analizador
+       lexico y sintactico, ademas que se pase como parametro la tabla
+       de simbolos correspondiente. */
+    public static void main(String[] args){
+        try {
+            ScannerSintaxReport asin = new ScannerSintaxReport(
+                    new ScannerLexReport( new FileReader(args[0])));
+            Object result = asin.parse().value;
+            System.out.println("\n*** Resultados finales ***");
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+:}
+
+action code
+{:
+    String textohtml = "";
+:}
+
+
+
+   
+/* ------------Declaracion de simbolos terminales y no terminales---------- */
+   
+/* Terminales (tokens obtenidos por el analizador lexico).  
+
+   Terminales que no tienen un valor son listados primero, los terminales que
+   tienen un valor como los enteros son listados en la segunda o demas lineas. */
+terminal    OPIGUAL, OPASIGSUMA, OPASIGRESTA, OPASIGMULT, OPINCREMENT, OPDECREMENT, PARA, PARC, CORA, CORC, PCOMA, COMA, PUNTO, OPSUMA, OPRESTA, OPMULT, OPDIV, 
+            OPMODULO, OPMEN, OPMAY, OPMENIGUAL, OPMAYIGUAL, OPCOMPARADOR, OPDISTINTO, OPAND, OPOR, OPNOT, RESULT, SCORE, VARIABLES, NOMBRE, CANTIDAD, CLASES, 
+            METODOS, TINT, TDOUBLE, TCHAR, TSTRING, TBOOL, PRINT, ENTERO, DECIMAL, ID, HTML, HEAD, BODY, TITLE, H1, H2, H3, H4, H5, H6, TABLE, TH, TD, TR, DIV, P, BR, HR, COLOR, TEXTCOLOR, ALIGN, FONT, TEXTOHTML, CADENA, DOLLAR;
+   
+/* No terminales usados en la seccion gramatical. 
+
+   Primero se lista los no terminales que tienen un valor Object y despues
+   se lista los no terminales que tienen un entero. Un Object se refiere a que
+   no tienen tipo, pudiendo ser entero o String. */
+non terminal Object     S0, INICIO, OPSHTML, SENTSHTML, SENTHTML, SENTSHEAD, SENTHEAD, SENTSTITLE, SENTTITLE, SENTSBODY, SENTBODY, SENTSTABLE, SENTTABLE, 
+                        SENTSROW, SENTROW, SENTSP, SENTP, EPS, CPREPORT, DECLARACION, TIPO, LISTAID, ASIGNA, ASIGNACION, OPASIGNA, IMPRIMIR, COND, 
+                        RELACIONAL, EXP, LLAMADA, LLAMAR, ARRAY, TEXTOPLANO;
+   
+
+/* -------------Seccion de predencia y asociacion de los terminales----------- */
+   
+  precedence left OPAND, OPOR;
+  precedence right OPNOT;
+  precedence left OPMEN, OPMAY, OPMENIGUAL, OPMAYIGUAL, OPIGUAL, OPDISTINTO;
+  precedence left OPSUMA, OPRESTA;
+  precedence left OPMULT, OPDIV;
+  precedence left OPMODULO;
+
+
+/* ------------------- Seccion de la gramatica ------------------------ */
+
+S0 ::=  S0 INICIO
+        | INICIO
+        ;
+
+INICIO ::=  DOLLAR CPREPORT DOLLAR
+            | OPMEN HTML OPMAY OPSHTML OPMEN OPDIV HTML OPMAY
+            | error OPMAY
+            | TEXTOPLANO
+            ;
+
+OPSHTML ::= SENTSHTML
+            | EPS
+            ;
+
+SENTSHTML ::=   SENTSHTML SENTHTML
+                | SENTHTML
+                ;
+
+SENTHTML ::=    DOLLAR CPREPORT DOLLAR
+                | OPMEN HEAD OPMAY SENTSHEAD OPMEN OPDIV HEAD OPMAY
+                | OPMEN BODY OPMAY SENTSBODY OPMEN OPDIV BODY OPMAY
+                | error OPMAY
+                | TEXTOPLANO
+                ;
+
+SENTSHEAD ::=   SENTSHEAD SENTHEAD
+                | SENTHEAD
+                ;
+
+SENTHEAD ::=    DOLLAR CPREPORT DOLLAR
+                | OPMEN TITLE OPMAY SENTSTITLE OPMEN OPDIV TITLE OPMAY
+                | error OPMAY
+                | TEXTOPLANO
+                ;
+
+SENTSTITLE ::=  SENTSTITLE SENTTITLE
+                | SENTTITLE
+                ;
+
+SENTTITLE ::=   DOLLAR CPREPORT DOLLAR
+                | TEXTOPLANO
+                ;
+
+SENTSBODY ::=   SENTSBODY SENTBODY
+                | SENTBODY
+                ;
+
+SENTBODY ::=    DOLLAR CPREPORT DOLLAR
+                | OPMEN H1 OPMAY SENTSTITLE OPMEN OPDIV H1 OPMAY
+                | OPMEN H2 OPMAY SENTSTITLE OPMEN OPDIV H2 OPMAY
+                | OPMEN H3 OPMAY SENTSTITLE OPMEN OPDIV H3 OPMAY
+                | OPMEN H4 OPMAY SENTSTITLE OPMEN OPDIV H4 OPMAY
+                | OPMEN H5 OPMAY SENTSTITLE OPMEN OPDIV H5 OPMAY
+                | OPMEN H6 OPMAY SENTSTITLE OPMEN OPDIV H6 OPMAY
+                | OPMEN TABLE OPMAY SENTSTABLE OPMEN OPDIV TABLE OPMAY
+                | OPMEN DIV OPMAY SENTSBODY OPMEN OPDIV DIV OPMAY
+                | OPMEN P OPMAY SENTSP OPMEN OPDIV P OPMAY
+                | OPMEN HR OPMAY 
+                | OPMEN BR OPMAY
+                | error OPMAY
+                | TEXTOPLANO
+                ;
+
+SENTSTABLE ::=  SENTSTABLE SENTTABLE
+                | SENTTABLE
+                ;
+
+SENTTABLE ::=   DOLLAR CPREPORT DOLLAR
+                | OPMEN TR OPMAY SENTSROW OPMEN OPDIV TR OPMAY
+                | error OPMAY
+                | TEXTOPLANO
+                ;
+
+SENTSROW ::=    SENTSROW SENTROW
+                | SENTROW
+                ;
+
+SENTROW ::= DOLLAR CPREPORT DOLLAR
+            | OPMEN TH OPMAY SENTSBODY OPMEN OPDIV TH OPMAY
+            | OPMEN TD OPMAY SENTSBODY OPMEN OPDIV TH OPMAY
+            | error OPMAY
+            | TEXTOPLANO
+            ;
+
+SENTSP ::=  SENTSP SENTP
+            | SENTP
+            ;
+
+SENTP ::=   DOLLAR CPREPORT DOLLAR
+            | OPMEN HR OPMAY
+            | OPMEN BR OPMAY
+            | TEXTOPLANO
+            ;
+
+EPS ::= ;
+
+CPREPORT ::=    DECLARACION
+                | ASIGNACION
+                | IMPRIMIR
+                | error PCOMA
+                | EPS
+                ;
+
+DECLARACION ::= TIPO LISTAID PCOMA
+                ;
+
+TIPO ::=    TINT
+            | TDOUBLE
+            | TCHAR
+            | TSTRING
+            | TBOOL
+            ;
+
+LISTAID ::= LISTAID COMA ID ASIGNA 
+            | ID ASIGNA
+            ;
+
+ASIGNA ::=  OPIGUAL COND
+            | EPS
+            ;
+
+ASIGNACION ::=  ID OPASIGNA COND PCOMA
+                ;
+
+OPASIGNA ::=    OPIGUAL
+                | OPASIGSUMA
+                | OPASIGRESTA
+                | OPASIGMULT
+                ;
+
+IMPRIMIR ::=    PRINT PARA COND PARC PCOMA
+                ;
+
+COND ::=    COND OPOR COND
+            | COND OPAND COND
+            | OPNOT COND
+            | EXP RELACIONAL EXP
+            | EXP
+            ;
+
+RELACIONAL ::=  OPCOMPARADOR
+                | OPDISTINTO
+                | OPMAYIGUAL
+                | OPMENIGUAL
+                | OPMAY
+                | OPMEN
+                ;
+
+EXP ::= EXP OPSUMA EXP
+        | EXP OPRESTA EXP
+        | EXP OPMULT EXP
+        | EXP OPDIV EXP
+        | EXP OPMODULO EXP
+        | OPRESTA EXP
+        | EXP OPINCREMENT
+        | EXP OPDECREMENT
+        | PARA COND PARC
+        | ENTERO
+        | DECIMAL
+        | CADENA
+        | ID
+        | LLAMADA
+        ;
+
+LLAMADA ::= RESULT PUNTO LLAMAR PCOMA
+            ;
+
+LLAMAR ::=  SCORE
+            | ARRAY 
+            | ARRAY PUNTO NOMBRE
+            | ARRAY PUNTO CANTIDAD
+            | ARRAY CORA ENTERO CORC PUNTO NOMBRE
+            ;
+
+ARRAY ::=   VARIABLES
+            | METODOS
+            | CLASES
+            ;
+
+TEXTOPLANO ::=  TEXTOHTML
+                | CADENA
+                | ID
+                | ENTERO
+                | DECIMAL
+                | FONT
+                | ALIGN
+                | TEXTCOLOR
+                | COLOR
+                | HR
+                | BR
+                | P
+                | DIV
+                | TR
+                | TD
+                | TH
+                | TABLE
+                | H1
+                | H2
+                | H3
+                | H4
+                | H5
+                | H6
+                | TITLE
+                | BODY
+                | HEAD
+                | HTML
+                | PRINT
+                | TIPO
+                | CLASES
+                | METODOS
+                | CANTIDAD
+                | NOMBRE
+                | VARIABLES
+                | SCORE
+                | RESULT
+                | OPNOT
+                | OPOR
+                | OPAND
+                | OPDISTINTO
+                | OPCOMPARADOR
+                | OPMAYIGUAL
+                | OPMENIGUAL
+                | OPMAY
+                | OPMODULO
+                | OPDIV
+                | OPMULT
+                | OPSUMA
+                | OPRESTA
+                | CORA
+                | CORC
+                | COMA
+                | PUNTO
+                | PCOMA
+                | PARA
+                | PARC
+                | OPINCREMENT
+                | OPDECREMENT
+                | OPASIGNA
+                ;
