@@ -45,3 +45,17 @@
 2018-04-02 13:14:16,836 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
 2018-04-02 13:14:18,495 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
 2018-04-02 14:10:42,935 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:11:27,621 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:16:43,897 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 18:17:03,745 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:18:52,158 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:19:21,888 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 18:21:29,283 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:23:28,686 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 18:23:45,873 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:25:14,793 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 18:25:51,505 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:29:24,436 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 18:41:38,074 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 18:46:30,642 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 18:46:45,484 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234

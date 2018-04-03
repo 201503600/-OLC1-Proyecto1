@@ -4,6 +4,8 @@ package compi201503600.servidor;
 import compi201503600.analisis.java.ScannerSintaxJava;
 import compi201503600.analisis.java.ScannerLexJava;
 import compi201503600.beans.Clase;
+import compi201503600.beans.Metodo;
+import compi201503600.beans.Variable;
 import java.awt.Color;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -11,6 +13,8 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.net.Socket;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Observable;
 import java.util.Observer;
 import java.util.logging.Level;
@@ -19,6 +23,7 @@ import javax.swing.text.AttributeSet;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.log4j.Logger;
 
 public class ConexionCliente extends Thread implements Observer{
@@ -30,14 +35,21 @@ public class ConexionCliente extends Thread implements Observer{
     private DataOutputStream salidaDatos;
     private JTextPane consola;
     
+    private String json;
+    private ScannerSintaxJava sintax;
+    
     public ConexionCliente (Socket socket, Sintonizador sint, JTextPane consola){
         this.socket = socket;
         this.sintonizador = sint;
         this.consola = consola;
-        
+        this.json = "";
         try {
             entradaDatos = new DataInputStream(socket.getInputStream());
             salidaDatos = new DataOutputStream(socket.getOutputStream());
+            listclases = new ArrayList<>();
+            listvars = new ArrayList<>();
+            listcomments = new ArrayList<>();
+            listmethods = new ArrayList<>();
         } catch (IOException ex) {
             appendToPane(consola, "Error al crear los stream de entrada y salida: " + ex.getMessage(), Color.RED);
             log.error("Error al crear los stream de entrada y salida : " + ex.getMessage());
@@ -59,11 +71,8 @@ public class ConexionCliente extends Thread implements Observer{
                 File archivo2 = new File(mensajeRecibido.split(";")[1]);
                 appendToPane(consola, "Proyecto " + archivo1.getName() + " recibido", Color.BLUE);
                 appendToPane(consola, "Proyecto " + archivo2.getName() + " recibido", Color.BLUE);
-                
-                ScannerSintaxJava sintax = new ScannerSintaxJava(new ScannerLexJava(new FileReader("test.txt")));
-                Object result = sintax.parse().value;
-                //ScannerSintaxJava.main(archivoPrueba); 
-                Clase c = sintax.getNuevaClase();
+                appendToPane(consola, "Iniciando analisis", Color.GRAY);
+                this.comparar(mensajeRecibido.split(";")[0], mensajeRecibido.split(";")[1]);
                 // Pone el mensaje recibido en mensajes para que se notifique 
                 // a sus observadores que hay un nuevo mensaje.
                 sintonizador.setMensaje(mensajeRecibido);
@@ -85,11 +94,224 @@ public class ConexionCliente extends Thread implements Observer{
         }   
     }
     
+    private ArrayList<String> listclases;
+    private ArrayList<Variable> listvars;
+    private ArrayList<String> listcomments;
+    private ArrayList<Metodo> listmethods;
+    private double clases = 0, clasesRep = 0;
+    private double vars = 0,varsRep = 0;
+    private double comments = 0, commentsRep = 0;
+    private double methods = 0, methodsRep = 0;
+    private void comparar(String dir1, String dir2) {
+        //Apertura del primer directorio
+        File arch1 = new File(dir1);
+        //Conseguimos un listado de los archivos y subdirectorios
+        String[] ficheros1 = arch1.list();
+        int i = 0;
+        //Recorremos el listado de archivos y directorios para realizar la comparacion
+        try {
+            while (i < ficheros1.length) {
+                File tmp1 = new File(arch1.getCanonicalPath() + "/" + ficheros1[i]);
+
+                //Si el archivo es un directorio volvemos a invocar el metodo.
+                if (tmp1.isDirectory()) {
+                    this.comparar(arch1.getCanonicalPath() + "/" + ficheros1[i], dir2);    
+                } else {
+                    // Si el archivo es .java, se procede a recorrer el segundo directorio
+                    if (FilenameUtils.getExtension(tmp1.getAbsolutePath()).equals("java")){
+                        clases++;
+                        //Apertura del segundo directorio
+                        File arch2 = new File(dir2);
+                        //Conseguimos un listado de los archivos y subdirectorios
+                        String[] ficheros2 = arch2.list();
+                        int j = 0;
+                        //Recorremos el segundo listado para comparar los .java con el .java del primer directorio
+                        try{
+                            while(j < ficheros2.length){
+                                File tmp2 = new File(arch2.getCanonicalPath() + "/" + ficheros2[j]);
+                                //Si el archivo es un directorio volvemos a invocar al metodo
+                                if (tmp2.isDirectory())
+                                    this.comparar(dir1, arch2.getCanonicalPath() + "/" + ficheros2[j]);
+                                else{
+                                    //Si el archivo es .java, se procede a comparar ambos archivos
+                                    if (FilenameUtils.getExtension(tmp2.getAbsolutePath()).equals("java")){
+                                        // CODIGO DE COMPARACION
+                                        appendToPane(consola, "Analizando " + tmp1.getName() + " ...", Color.GRAY);
+                                        sintax = new ScannerSintaxJava(new ScannerLexJava(new FileReader(tmp1.getAbsolutePath())));
+                                        sintax.parse();
+                                        Clase clase1 = sintax.getNuevaClase();
+                                        appendToPane(consola, "Analizando " + tmp2.getName() + " ...", Color.GRAY);
+                                        sintax = new ScannerSintaxJava(new ScannerLexJava(new FileReader(tmp2.getAbsolutePath())));
+                                        sintax.parse();
+                                        Clase clase2 = sintax.getNuevaClase();
+                                        
+                                        appendToPane(consola, "Comparando " + tmp1.getName() + " y " + tmp2.getName() + " ...", Color.BLUE);
+                                        
+                                        //Comparacion comentarios
+                                        for(String com1:clase1.getComentarios()){
+                                            comments++;
+                                            if (clase2.getComentarios().contains(com1)){
+                                                commentsRep++;
+                                                listcomments.add(com1);
+                                            }else
+                                                comments++;
+                                        }
+                                        
+                                        //Comparación de variables
+                                        for(Variable var1:clase1.getVariables()){
+                                            vars++;
+                                            for(Variable var2:clase2.getVariables()){
+                                                if (var1 == clase1.getVariables().get(0)){
+                                                    vars++;
+                                                    if (var1.getMetodo().equals("global") && var2.getMetodo().equals("global")){
+                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
+                                                            varsRep += 2;
+                                                            listvars.add(var1);
+                                                        }                                                           
+                                                    }else if (var1.getMetodo().equals("global") || var2.getMetodo().equals("global")){
+                                                        //vars++;
+                                                    }else{
+                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
+                                                            varsRep += 2;
+                                                            listvars.add(var1);
+                                                        }
+                                                    }
+                                                }else{
+                                                    if (var1.getMetodo().equals("global") && var2.getMetodo().equals("global")){
+                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
+                                                            varsRep += 2;
+                                                            listvars.add(var1);
+                                                        }
+                                                    }else if (var1.getMetodo().equals("global") || var2.getMetodo().equals("global")){
+                                                        //No se hace nada, var2 ya fue agregada y no esta en el mismo ambito que var1
+                                                    }else{
+                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
+                                                            varsRep += 2;
+                                                            listvars.add(var1);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        //Comparación de metodos
+                                        boolean claseRep = false;
+                                        for(Metodo met1:clase1.getMetodos()){
+                                            methods++;
+                                            for(Metodo met2:clase2.getMetodos()){
+                                                if (met1 == clase1.getMetodos().get(0)){
+                                                    methods++;
+                                                    if (met1.getNombre().equals(met2.getNombre()) && met1.getTipo().equals(met2.getTipo()) &&
+                                                            met1.getParametros().size() == met2.getParametros().size()){
+                                                        methodsRep += 2;
+                                                        listmethods.add(met1);
+                                                        claseRep = true;
+                                                    }
+                                                }else{
+                                                    if (met1.getNombre().equals(met2.getNombre()) && met1.getTipo().equals(met2.getTipo()) &&
+                                                            met1.getParametros().size() == met2.getParametros().size()){
+                                                        methodsRep += 2;
+                                                        listmethods.add(met1);
+                                                        claseRep = true;
+                                                    }
+                                                }
+                                            }
+                                        }
+                                        
+                                        //Comparación de clase
+                                        if (claseRep && clase1.getNombre().equals(clase2.getNombre())){
+                                            clasesRep++;
+                                            listclases.add(clase1.getNombre());
+                                        }else
+                                            clases++;
+                                        
+                                    }
+                                }
+                                j++;
+                            }
+                        }catch(IOException e2){
+                            appendToPane(consola, e2.getMessage(), Color.RED);
+                        } catch (Exception ex) {
+                            appendToPane(consola, ex.getMessage(), Color.RED);
+                            java.util.logging.Logger.getLogger(ConexionCliente.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                    }
+                }
+                
+                i++;
+            }
+            
+            appendToPane(consola, "\nGenerando Json ...", Color.GRAY);
+            generarJson();
+            appendToPane(consola, "Json generado!", Color.GREEN);
+        } catch (IOException e) {
+            appendToPane(consola, e.getMessage(), Color.RED);
+        }
+    } 
+    
+    private void generarJson(){
+        DecimalFormat format = new DecimalFormat("#.00");
+        double score = 0.25*(commentsRep/comments + varsRep/vars + methodsRep/methods + clasesRep/clases);
+        json += "{";
+        
+        //Generando codigo score
+        json += "score:[" + format.format(score) + "]";
+        
+        //Generando codigo clases
+        json += ", clases:[";
+        for(String c:listclases)
+            if (c.equals(listclases.get(0)))
+                json += "{nombre:\"" + c + "\"}";
+            else
+                json += ", {nombre:\"" + c + "\"}";
+        json += "]";
+        
+        //Generando codigo variables
+        json += ", variables:[";
+        for(Variable v:listvars)
+            if (v == listvars.get(0))
+                json += "{nombre:\"" + v.getNombre() + "\", tipo:\"" + v.getTipo() + "\", funcion:\"" + 
+                        v.getMetodo() + "\", clase:\"" + v.getClase() + "\"}";
+            else
+                json += ", {nombre:\"" + v.getNombre() + "\", tipo:\"" + v.getTipo() + "\", funcion:\"" + 
+                        v.getMetodo() + "\", clase:\"" + v.getClase() + "\"}";
+        json += "]";
+        
+        //Generando codigo metodos
+        json += ", metodos:[";
+        for(Metodo m:listmethods)
+            if (m == listmethods.get(0))
+                json += "{nombre:\"" + m.getNombre() + "\", tipo:\"" + m.getTipo() + "\", parametros:\"" + 
+                        m.getParametros().size() + "\"}";
+            else
+                json += ", {nombre:\"" + m.getNombre() + "\", tipo:\"" + m.getTipo() + "\", parametros:\"" + 
+                        m.getParametros().size() + "\"}";
+        json += "]";
+        
+        //Generando codigo comentarios
+        json += ", comentarios:[";
+        for(String c:listcomments)
+            if (c.equals(listcomments.get(0)))
+                json += "{texto:\"" + c + "\"}";
+            else
+                json += ", {texto:\"" + c + "\"}";
+        json += "]";
+        
+        json += "}";
+        
+        clases = clasesRep = vars = varsRep = comments = commentsRep = methods = methodsRep = 0;
+        listclases = new ArrayList<>();
+        listvars = new ArrayList<>();
+        listcomments = new ArrayList<>();
+        listmethods = new ArrayList<>();
+    }
+    
     @Override
     public void update(Observable o, Object arg) {
         try {
             // Envia el mensaje al cliente
-            salidaDatos.writeUTF("ANALISIS COMPLETADO :D");
+            salidaDatos.writeUTF(json);
+            json = "";
         } catch (IOException ex) {
             log.error("Error al enviar mensaje al cliente (" + ex.getMessage() + ").");
         }
