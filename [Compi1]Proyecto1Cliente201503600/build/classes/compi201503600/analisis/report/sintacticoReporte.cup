@@ -19,6 +19,10 @@ parser code
         return textohtml;
     }
 
+    public Object stack(int position){
+      return (((Symbol)stack.elementAt(tos + position)).value);
+    }
+
     public void syntax_error(Symbol s){
         System.out.println("Error R de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
     }
@@ -84,7 +88,8 @@ terminal Integer ENTERO;
 terminal double  DECIMAL;
 terminal    OPIGUAL, OPASIGSUMA, OPASIGRESTA, OPASIGMULT, OPINCREMENT, OPDECREMENT, PARA, PARC, CORA, CORC, PCOMA, COMA, PUNTO, OPSUMA, OPRESTA, OPMULT, OPDIV, 
             OPMODULO, OPMEN, OPMAY, OPMENIGUAL, OPMAYIGUAL, OPCOMPARADOR, OPDISTINTO, OPAND, OPOR, OPNOT, RESULT, SCORE, VARIABLES, NOMBRE, CANTIDAD, CLASES, 
-            METODOS, TINT, TDOUBLE, TCHAR, TSTRING, TBOOL, PRINT, HTML, HEAD, BODY, TITLE, H1, H2, H3, H4, H5, H6, TABLE, TH, TD, TR, DIV, P, BR, HR, COLOR, TEXTCOLOR, ALIGN, FONT, DOLLAR;
+            METODOS, TINT, TDOUBLE, TCHAR, TSTRING, TBOOL, PRINT, HTML, HEAD, BODY, TITLE, H1, H2, H3, H4, H5, H6, TABLE, TH, TD, TR, DIV, P, BR, HR, COLOR, TEXTCOLOR, 
+            ALIGN, FONT, DOLLAR, TIPO, FUNCION, CLASE, PARAMETRO;
    
 /* No terminales usados en la seccion gramatical. 
 
@@ -92,9 +97,9 @@ terminal    OPIGUAL, OPASIGSUMA, OPASIGRESTA, OPASIGMULT, OPINCREMENT, OPDECREME
    se lista los no terminales que tienen un entero. Un Object se refiere a que
    no tienen tipo, pudiendo ser entero o String. */
 non terminal String     OPASIGNA;
-non terminal Object     S0, INICIO, SENTSHTML, SENTHTML, SENTSHEAD, SENTHEAD, SENTSTITLE, SENTTITLE, SENTSBODY, SENTBODY, SENTSTABLE, SENTTABLE, 
-                        SENTSROW, SENTROW, SENTSP, SENTP, EPS, CPREPORT, DECLARACION, TIPO, LISTAID, ASIGNA, ASIGNACION, IMPRIMIR, COND, 
-                        RELACIONAL, EXP, LLAMADA, LLAMAR, ARRAY, TEXTOPLANO;
+non terminal Object     INIT, S0, INICIO, SENTSHTML, SENTHTML, SENTSHEAD, SENTHEAD, SENTSTITLE, SENTTITLE, SENTSBODY, SENTBODY, SENTSTABLE, SENTTABLE, 
+                        SENTSROW, SENTROW, SENTSP, SENTP, EPS, CPREPORT, DECLARACION, TIPODATO, LISTAID, ASIGNA, ASIGNACION, IMPRIMIR, COND, 
+                        RELACIONAL, EXP, LLAMADA, LLAMAR, ARRAY, TEXTOPLANO, ATR;
    
 
 /* -------------Seccion de predencia y asociacion de los terminales----------- */
@@ -108,13 +113,17 @@ non terminal Object     S0, INICIO, SENTSHTML, SENTHTML, SENTSHEAD, SENTHEAD, SE
 
 
 /* ------------------- Seccion de la gramatica ------------------------ */
+start with INIT;
+
+INIT ::=    S0
+            ;
 
 S0 ::=  S0 INICIO
         | INICIO
         ;
 
 INICIO ::=  DOLLAR CPREPORT DOLLAR
-            | OPMEN HTML OPMAY  {: parser.textohtml += "<html>"; :} SENTSHTML OPMEN OPDIV HTML OPMAY {: parser.textohtml += "</html>"; :}
+            | OPMEN HTML OPMAY  {: parser.textohtml += "<html>"; System.out.println("Entra aca"); :} SENTSHTML OPMEN OPDIV HTML OPMAY {: parser.textohtml += "</html>"; :}
             | error OPMAY
             | TEXTOPLANO
             ;
@@ -208,10 +217,10 @@ CPREPORT ::=    DECLARACION
                 | EPS
                 ;
 
-DECLARACION ::= TIPO LISTAID PCOMA
+DECLARACION ::= TIPODATO LISTAID PCOMA
                 ;
 
-TIPO ::=    TINT
+TIPODATO ::=    TINT
             | TDOUBLE
             | TCHAR
             | TSTRING
@@ -276,7 +285,14 @@ LLAMAR ::=  SCORE
             | ARRAY 
             | ARRAY PUNTO NOMBRE
             | ARRAY PUNTO CANTIDAD
-            | ARRAY CORA ENTERO CORC PUNTO NOMBRE
+            | ARRAY CORA ENTERO CORC PUNTO ATR
+            ;
+
+ATR ::=     NOMBRE
+            | TIPO
+            | FUNCION
+            | CLASE
+            | PARAMETRO
             ;
 
 ARRAY ::=   VARIABLES
@@ -327,7 +343,6 @@ TEXTOPLANO ::=  TEXTOHTML:t     {: parser.textohtml += t; :}
                 | OPCOMPARADOR  {: parser.textohtml += "=="; :}
                 | OPMAYIGUAL    {: parser.textohtml += ">="; :}
                 | OPMENIGUAL    {: parser.textohtml += "<="; :} 
-                | OPMEN         {: parser.textohtml += "<"; :}
                 | OPMAY         {: parser.textohtml += ">"; :}
                 | OPMODULO      {: parser.textohtml += "%"; :}
                 | OPDIV         {: parser.textohtml += "/"; :}

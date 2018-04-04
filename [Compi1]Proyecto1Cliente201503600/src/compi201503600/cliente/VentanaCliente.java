@@ -85,6 +85,7 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
         mn_delete.addActionListener(this);
         mn_chargeProject.addActionListener(this);
         mn_analizeProject.addActionListener(this);
+        mn_analizar.addActionListener(this);
         jMenuItem90.addActionListener(this);
         tabReport.addChangeListener(this);
         arbolProyectos.addMouseListener(this);
@@ -126,6 +127,7 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
         
     private JFileChooser seleccionador;
     private int indexTab;
+    private Result json;
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == mn_create){
@@ -233,6 +235,7 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
             try{
                 JTextArea textArea = ((JTextArea)((JScrollPane)((JPanel)contentTabs.get(indexTab)).getComponent(0)).getViewport().getView());
                 ScannerSintaxReport sintax = new ScannerSintaxReport(new ScannerLexReport(new ByteArrayInputStream(textArea.getText().getBytes(StandardCharsets.UTF_8))));
+                sintax.setResult(json);
                 sintax.parse();
                 JOptionPane.showMessageDialog(this, sintax.getHtml());
             }catch(Exception ex){}
@@ -644,13 +647,13 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
             while (conectado) {
                 try {
                     response = entradaDatos.readUTF();
-                    JOptionPane.showMessageDialog(null, response);
+                    //JOptionPane.showMessageDialog(null, response);
                     appendToPane(jTextPane1, "Analizando respuesta de servidor ...", Color.GRAY);
                     ScannerSintaxJson sintaxJson = new ScannerSintaxJson(new ScannerLexJson(new ByteArrayInputStream(response.getBytes(StandardCharsets.UTF_8))));
                     sintaxJson.parse();
-                    Result objeto = sintaxJson.getResult();
+                    json = sintaxJson.getResult();
                     appendToPane(jTextPane1, "Respuesta analizada!", Color.BLUE);
-                    VentanaResult v = new VentanaResult(objeto);
+                    VentanaResult v = new VentanaResult(json);
                     v.setVisible(true);
                 } catch (IOException ex) {
                     appendToPane(jTextPane1, "Error al leer del stream de entrada: " + ex.getMessage(), Color.RED);

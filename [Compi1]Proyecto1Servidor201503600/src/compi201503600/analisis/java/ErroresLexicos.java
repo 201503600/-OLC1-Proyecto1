@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.josebautista.errores;
+package compi201503600.analisis.java;
 
 /**
  *

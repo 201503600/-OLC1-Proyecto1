@@ -9,7 +9,7 @@ import java.io.Reader;
     //Código de usuario
     String text = "";
 %}
-
+%public
 %cup
 %class ScannerLexReport
 %line
@@ -52,94 +52,98 @@ SPACE   = [\ \r\t\f\t]
 ENTER   = [ \ \n]
 
 %%
-<YYINITIAL> "="            { return new Symbol(sym.OPIGUAL, yyline, yycolumn, yytext());}
-<YYINITIAL> "+="           { return new Symbol(sym.OPASIGSUMA, yyline, yycolumn, yytext());}
-<YYINITIAL> "-="           { return new Symbol(sym.OPASIGRESTA, yyline, yycolumn, yytext());}
-<YYINITIAL> "*="           { return new Symbol(sym.OPASIGMULT, yyline, yycolumn, yytext());}
-<YYINITIAL> "++"           { return new Symbol(sym.OPINCREMENT, yyline, yycolumn, yytext());}
-<YYINITIAL> "--"           { return new Symbol(sym.OPDECREMENT, yyline, yycolumn, yytext());}
-<YYINITIAL> "("            { return new Symbol(sym.PARA, yyline, yycolumn, yytext());}
-<YYINITIAL> ")"            { return new Symbol(sym.PARC, yyline, yycolumn, yytext());}
-<YYINITIAL> ";"            { return new Symbol(sym.PCOMA, yyline, yycolumn, yytext());}
-<YYINITIAL> ","            { return new Symbol(sym.COMA, yyline, yycolumn, yytext());}
-<YYINITIAL> "."            { return new Symbol(sym.PUNTO, yyline, yycolumn, yytext());}
-<YYINITIAL> "["            { return new Symbol(sym.CORA, yyline, yycolumn, yytext());}
-<YYINITIAL> "]"            { return new Symbol(sym.CORC, yyline, yycolumn, yytext());}
-<YYINITIAL> "+"            { return new Symbol(sym.OPSUMA, yyline, yycolumn, yytext());}
-<YYINITIAL> "-"            { return new Symbol(sym.OPRESTA, yyline, yycolumn, yytext());}
-<YYINITIAL> "*"            { return new Symbol(sym.OPMULT, yyline, yycolumn, yytext());}
-<YYINITIAL> "/"            { return new Symbol(sym.OPDIV, yyline, yycolumn, yytext());}
-<YYINITIAL> "%"            { return new Symbol(sym.OPMODULO, yyline, yycolumn, yytext());}
-<YYINITIAL> "<"            { return new Symbol(sym.OPMEN, yyline, yycolumn, yytext());}
-<YYINITIAL> ">"            { return new Symbol(sym.OPMAY, yyline, yycolumn, yytext());}
-<YYINITIAL> "<="            { return new Symbol(sym.OPMENIGUAL, yyline, yycolumn, yytext());}
-<YYINITIAL> ">="            { return new Symbol(sym.OPMAYIGUAL, yyline, yycolumn, yytext());}
-<YYINITIAL> "=="            { return new Symbol(sym.OPCOMPARADOR, yyline, yycolumn, yytext());}
-<YYINITIAL> "!="            { return new Symbol(sym.OPDISTINTO, yyline, yycolumn, yytext());}
-<YYINITIAL> "&&"            { return new Symbol(sym.OPAND, yyline, yycolumn, yytext());}
-<YYINITIAL> "||"            { return new Symbol(sym.OPOR, yyline, yycolumn, yytext());}
-<YYINITIAL> "!"            { return new Symbol(sym.OPNOT, yyline, yycolumn, yytext());}
+<YYINITIAL> "="            { return symbol(sym.OPIGUAL);}
+<YYINITIAL> "+="           { return symbol(sym.OPASIGSUMA);}
+<YYINITIAL> "-="           { return symbol(sym.OPASIGRESTA);}
+<YYINITIAL> "*="           { return symbol(sym.OPASIGMULT);}
+<YYINITIAL> "++"           { return symbol(sym.OPINCREMENT);}
+<YYINITIAL> "--"           { return symbol(sym.OPDECREMENT);}
+<YYINITIAL> "("            { return symbol(sym.PARA);}
+<YYINITIAL> ")"            { return symbol(sym.PARC);}
+<YYINITIAL> ";"            { return symbol(sym.PCOMA);}
+<YYINITIAL> ","            { return symbol(sym.COMA);}
+<YYINITIAL> "."            { return symbol(sym.PUNTO);}
+<YYINITIAL> "["            { return symbol(sym.CORA);}
+<YYINITIAL> "]"            { return symbol(sym.CORC);}
+<YYINITIAL> "+"            { return symbol(sym.OPSUMA);}
+<YYINITIAL> "-"            { return symbol(sym.OPRESTA);}
+<YYINITIAL> "*"            { return symbol(sym.OPMULT);}
+<YYINITIAL> "/"            { return symbol(sym.OPDIV);}
+<YYINITIAL> "%"            { return symbol(sym.OPMODULO);}
+<YYINITIAL> "<"            { return symbol(sym.OPMEN);}
+<YYINITIAL> ">"            { return symbol(sym.OPMAY);}
+<YYINITIAL> "<="            { return symbol(sym.OPMENIGUAL);}
+<YYINITIAL> ">="            { return symbol(sym.OPMAYIGUAL);}
+<YYINITIAL> "=="            { return symbol(sym.OPCOMPARADOR);}
+<YYINITIAL> "!="            { return symbol(sym.OPDISTINTO);}
+<YYINITIAL> "&&"            { return symbol(sym.OPAND);}
+<YYINITIAL> "||"            { return symbol(sym.OPOR);}
+<YYINITIAL> "!"            { return symbol(sym.OPNOT);}
 
-<YYINITIAL> "RESULT"       { return new Symbol(sym.RESULT, yyline, yycolumn, yytext());}
-<YYINITIAL> "Score"        { return new Symbol(sym.SCORE, yyline, yycolumn, yytext());}
-<YYINITIAL> "variables"    { return new Symbol(sym.VARIABLES, yyline, yycolumn, yytext());}
-<YYINITIAL> "nombre"       { return new Symbol(sym.NOMBRE, yyline, yycolumn, yytext());}
-<YYINITIAL> "cantidad"     { return new Symbol(sym.CANTIDAD, yyline, yycolumn, yytext());}
-<YYINITIAL> "metodos"      { return new Symbol(sym.METODOS, yyline, yycolumn, yytext());}
-<YYINITIAL> "clases"       { return new Symbol(sym.CLASES, yyline, yycolumn, yytext());}
-<YYINITIAL> "Entero"       { return new Symbol(sym.TINT, yyline, yycolumn, yytext());}
-<YYINITIAL> "Decimal"      { return new Symbol(sym.TDOUBLE, yyline, yycolumn, yytext());}
-<YYINITIAL> "Caracter"     { return new Symbol(sym.TCHAR, yyline, yycolumn, yytext());}
-<YYINITIAL> "Texto"        { return new Symbol(sym.TSTRING, yyline, yycolumn, yytext());}
-<YYINITIAL> "Booleano"     { return new Symbol(sym.TBOOL, yyline, yycolumn, yytext());}
-<YYINITIAL> "PRINT"        { return new Symbol(sym.PRINT, yyline, yycolumn, yytext());}
+<YYINITIAL> "RESULT"       { return symbol(sym.RESULT);}
+<YYINITIAL> "Score"        { return symbol(sym.SCORE);}
+<YYINITIAL> "variables"    { return symbol(sym.VARIABLES);}
+<YYINITIAL> "nombre"       { return symbol(sym.NOMBRE);}
+<YYINITIAL> "tipo"         { return symbol(sym.TIPO); }
+<YYINITIAL> "funcion"      { return symbol(sym.FUNCION); }
+<YYINITIAL> "clase"        { return symbol(sym.CLASE); }
+<YYINITIAL> "parametro"    { return symbol(sym.PARAMETRO); }
+<YYINITIAL> "cantidad"     { return symbol(sym.CANTIDAD);}
+<YYINITIAL> "metodos"      { return symbol(sym.METODOS);}
+<YYINITIAL> "clases"       { return symbol(sym.CLASES);}
+<YYINITIAL> "Entero"       { return symbol(sym.TINT);}
+<YYINITIAL> "Decimal"      { return symbol(sym.TDOUBLE);}
+<YYINITIAL> "Caracter"     { return symbol(sym.TCHAR);}
+<YYINITIAL> "Texto"        { return symbol(sym.TSTRING);}
+<YYINITIAL> "Booleano"     { return symbol(sym.TBOOL);}
+<YYINITIAL> "PRINT"        { return symbol(sym.PRINT);}
 
-<YYINITIAL> "html"      { return new Symbol(sym.HTML, yyline, yycolumn, yytext());}
-<YYINITIAL> "head"      { return new Symbol(sym.HEAD, yyline, yycolumn, yytext());}
-<YYINITIAL> "body"      { return new Symbol(sym.BODY, yyline, yycolumn, yytext());}
-<YYINITIAL> "title"     { return new Symbol(sym.TITLE, yyline, yycolumn, yytext());}
-<YYINITIAL> "h1"        { return new Symbol(sym.H1, yyline, yycolumn, yytext());}
-<YYINITIAL> "h2"        { return new Symbol(sym.H2, yyline, yycolumn, yytext());}
-<YYINITIAL> "h3"        { return new Symbol(sym.H3, yyline, yycolumn, yytext());}
-<YYINITIAL> "h4"        { return new Symbol(sym.H4, yyline, yycolumn, yytext());}
-<YYINITIAL> "h5"        { return new Symbol(sym.H5, yyline, yycolumn, yytext());}
-<YYINITIAL> "h6"        { return new Symbol(sym.H6, yyline, yycolumn, yytext());}
-<YYINITIAL> "table"     { return new Symbol(sym.TABLE, yyline, yycolumn, yytext());}
-<YYINITIAL> "th"        { return new Symbol(sym.TH, yyline, yycolumn, yytext());}
-<YYINITIAL> "td"        { return new Symbol(sym.TD, yyline, yycolumn, yytext());}
-<YYINITIAL> "tr"        { return new Symbol(sym.TR, yyline, yycolumn, yytext());}
-<YYINITIAL> "div"       { return new Symbol(sym.DIV, yyline, yycolumn, yytext());}
-<YYINITIAL> "p"         { return new Symbol(sym.P, yyline, yycolumn, yytext());}
-<YYINITIAL> "br"        { return new Symbol(sym.BR, yyline, yycolumn, yytext());}
-<YYINITIAL> "hr"        { return new Symbol(sym.HR, yyline, yycolumn, yytext());}
-<YYINITIAL> "color"     { return new Symbol(sym.COLOR, yyline, yycolumn, yytext());}
-<YYINITIAL> "textcolor" { return new Symbol(sym.TEXTCOLOR, yyline, yycolumn, yytext());}
-<YYINITIAL> "align"     { return new Symbol(sym.ALIGN, yyline, yycolumn, yytext());}
-<YYINITIAL> "font"      { return new Symbol(sym.FONT, yyline, yycolumn, yytext());}
+<YYINITIAL> "html"      { return symbol(sym.HTML);}
+<YYINITIAL> "head"      { return symbol(sym.HEAD);}
+<YYINITIAL> "body"      { return symbol(sym.BODY);}
+<YYINITIAL> "title"     { return symbol(sym.TITLE);}
+<YYINITIAL> "h1"        { return symbol(sym.H1);}
+<YYINITIAL> "h2"        { return symbol(sym.H2);}
+<YYINITIAL> "h3"        { return symbol(sym.H3);}
+<YYINITIAL> "h4"        { return symbol(sym.H4);}
+<YYINITIAL> "h5"        { return symbol(sym.H5);}
+<YYINITIAL> "h6"        { return symbol(sym.H6);}
+<YYINITIAL> "table"     { return symbol(sym.TABLE);}
+<YYINITIAL> "th"        { return symbol(sym.TH);}
+<YYINITIAL> "td"        { return symbol(sym.TD);}
+<YYINITIAL> "tr"        { return symbol(sym.TR);}
+<YYINITIAL> "div"       { return symbol(sym.DIV);}
+<YYINITIAL> "p"         { return symbol(sym.P);}
+<YYINITIAL> "br"        { return symbol(sym.BR);}
+<YYINITIAL> "hr"        { return symbol(sym.HR);}
+<YYINITIAL> "color"     { return symbol(sym.COLOR);}
+<YYINITIAL> "textcolor" { return symbol(sym.TEXTCOLOR);}
+<YYINITIAL> "align"     { return symbol(sym.ALIGN);}
+<YYINITIAL> "font"      { return symbol(sym.FONT);}
 
-<YYINITIAL> {ENTERO}       { return new Symbol(sym.ENTERO, yyline, yycolumn,yytext());}
-<YYINITIAL> {DECIMAL}      { return new Symbol(sym.DECIMAL, yyline, yycolumn, yytext());}
-<YYINITIAL> {ID}           { return new Symbol(sym.ID, yyline, yycolumn,yytext());}
+<YYINITIAL> {ENTERO}       { return symbol(sym.ENTERO,yytext());}
+<YYINITIAL> {DECIMAL}      { return symbol(sym.DECIMAL, yytext());}
+<YYINITIAL> {ID}           { return symbol(sym.ID,yytext());}
 <YYINITIAL> {COMENTARIO}   { /* Comentarios ignorados */}
 <YYINITIAL> [\"]           { yybegin(CADENA); text = "\""; }
-<YYINITIAL> "$$"       { return new Symbol(sym.DOLLAR, yyline, yycolumn, yytext()); }
+<YYINITIAL> "$$"       { return symbol(sym.DOLLAR); }
 
 <YYINITIAL> {SPACE}        { /*Espacios en blanco, ignorados*/ }
 <YYINITIAL> {ENTER}        { /*Saltos de linea, ignorados*/}
-<YYINITIAL> .           { return new Symbol(sym.TEXTOHTML, yyline, yycolumn, yytext());}
+<YYINITIAL> .           { return symbol(sym.TEXTOHTML, yytext());}
 
 <CADENA> {
         [\"]    { 
                     String tmp = text + "\""; 
                     text = ""; 
                     yybegin(YYINITIAL);  
-                    return new Symbol(sym.CADENA, yychar,yyline,tmp); 
+                    return symbol(sym.CADENA, tmp); 
                 }
         [\n]    {
                     String tmp = text; 
                     text = "";  
                     yybegin(YYINITIAL);
-                    return new Symbol(sym.TEXTOHTML, yychar, yyline, tmp);
+                    return symbol(sym.TEXTOHTML, tmp);
                 }
         [^\"]   { text += yytext(); }
 }
