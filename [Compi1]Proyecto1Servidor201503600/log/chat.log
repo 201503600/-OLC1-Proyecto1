@@ -110,3 +110,10 @@
 2018-04-02 23:19:07,147 [Thread-5] INFO  compi201503600.servidor.ConexionCliente - Cliente con la IP 127.0.0.1 desconectado.
 2018-04-02 23:19:21,076 [Thread-2] INFO  compi201503600.main.Compi1Proyecto1Servidor201503600 - Cliente con la IP 127.0.0.1 conectado.
 2018-04-02 23:19:21,091 [Thread-2] INFO  compi201503600.main.Compi1Proyecto1Servidor201503600 - Servidor a la espera de conexiones.
+2018-04-04 00:34:44,601 [Thread-2] INFO  compi201503600.main.Compi1Proyecto1Servidor201503600 - Servidor a la espera de conexiones.
+2018-04-04 00:34:56,396 [Thread-2] INFO  compi201503600.main.Compi1Proyecto1Servidor201503600 - Cliente con la IP 127.0.0.1 conectado.
+2018-04-04 00:34:56,443 [Thread-2] INFO  compi201503600.main.Compi1Proyecto1Servidor201503600 - Servidor a la espera de conexiones.
+2018-04-04 00:35:05,120 [Thread-3] INFO  compi201503600.servidor.ConexionCliente - Cliente con la IP 127.0.0.1 desconectado.
+2018-04-04 00:35:10,200 [Thread-2] INFO  compi201503600.main.Compi1Proyecto1Servidor201503600 - Cliente con la IP 127.0.0.1 conectado.
+2018-04-04 00:35:10,204 [Thread-2] INFO  compi201503600.main.Compi1Proyecto1Servidor201503600 - Servidor a la espera de conexiones.
+2018-04-04 00:36:09,716 [Thread-4] INFO  compi201503600.servidor.ConexionCliente - Cliente con la IP 127.0.0.1 desconectado.

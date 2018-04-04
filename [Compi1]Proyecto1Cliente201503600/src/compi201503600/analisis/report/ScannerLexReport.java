@@ -11,7 +11,7 @@ import java.io.Reader;
  * <a href="http://www.jflex.de/">JFlex</a> 1.5.0-SNAPSHOT
  * from the specification file <tt>src/compi201503600/analisis/report/lexicoReporte.jflex</tt>
  */
-class ScannerLexReport implements java_cup.runtime.Scanner {
+public class ScannerLexReport implements java_cup.runtime.Scanner {
 
   /** This character denotes the end of file */
   public static final int YYEOF = -1;
@@ -473,7 +473,7 @@ class ScannerLexReport implements java_cup.runtime.Scanner {
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  ScannerLexReport(java.io.Reader in) {
+  public ScannerLexReport(java.io.Reader in) {
     this.zzReader = in;
   }
 
@@ -483,7 +483,7 @@ class ScannerLexReport implements java_cup.runtime.Scanner {
    *
    * @param   in  the java.io.Inputstream to read input from.
    */
-  ScannerLexReport(java.io.InputStream in) {
+  public ScannerLexReport(java.io.InputStream in) {
     this(new java.io.InputStreamReader
              (in, java.nio.charset.Charset.forName("UTF-8")));
   }

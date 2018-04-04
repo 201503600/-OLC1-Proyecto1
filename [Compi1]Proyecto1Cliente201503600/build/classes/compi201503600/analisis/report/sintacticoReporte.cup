@@ -2,10 +2,22 @@ package compi201503600.analisis.report;
 
 import java_cup.runtime.*;
 import java.io.FileReader;
+import compi201503600.beans.*;
 
 //PARSER 
 parser code
 {://Codigo visible
+
+    public Result resultado;
+
+    public void setResult(Result resultado){
+        this.resultado = resultado;
+    }
+
+    public String textohtml = "";
+    public String getHtml(){
+        return textohtml;
+    }
 
     public void syntax_error(Symbol s){
         System.out.println("Error R de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
@@ -56,7 +68,6 @@ parser code
 
 action code
 {:
-    String textohtml = "";
 :}
 
 
@@ -68,17 +79,21 @@ action code
 
    Terminales que no tienen un valor son listados primero, los terminales que
    tienen un valor como los enteros son listados en la segunda o demas lineas. */
+terminal String TEXTOHTML, CADENA, ID;
+terminal Integer ENTERO;
+terminal double  DECIMAL;
 terminal    OPIGUAL, OPASIGSUMA, OPASIGRESTA, OPASIGMULT, OPINCREMENT, OPDECREMENT, PARA, PARC, CORA, CORC, PCOMA, COMA, PUNTO, OPSUMA, OPRESTA, OPMULT, OPDIV, 
             OPMODULO, OPMEN, OPMAY, OPMENIGUAL, OPMAYIGUAL, OPCOMPARADOR, OPDISTINTO, OPAND, OPOR, OPNOT, RESULT, SCORE, VARIABLES, NOMBRE, CANTIDAD, CLASES, 
-            METODOS, TINT, TDOUBLE, TCHAR, TSTRING, TBOOL, PRINT, ENTERO, DECIMAL, ID, HTML, HEAD, BODY, TITLE, H1, H2, H3, H4, H5, H6, TABLE, TH, TD, TR, DIV, P, BR, HR, COLOR, TEXTCOLOR, ALIGN, FONT, TEXTOHTML, CADENA, DOLLAR;
+            METODOS, TINT, TDOUBLE, TCHAR, TSTRING, TBOOL, PRINT, HTML, HEAD, BODY, TITLE, H1, H2, H3, H4, H5, H6, TABLE, TH, TD, TR, DIV, P, BR, HR, COLOR, TEXTCOLOR, ALIGN, FONT, DOLLAR;
    
 /* No terminales usados en la seccion gramatical. 
 
    Primero se lista los no terminales que tienen un valor Object y despues
    se lista los no terminales que tienen un entero. Un Object se refiere a que
    no tienen tipo, pudiendo ser entero o String. */
-non terminal Object     S0, INICIO, OPSHTML, SENTSHTML, SENTHTML, SENTSHEAD, SENTHEAD, SENTSTITLE, SENTTITLE, SENTSBODY, SENTBODY, SENTSTABLE, SENTTABLE, 
-                        SENTSROW, SENTROW, SENTSP, SENTP, EPS, CPREPORT, DECLARACION, TIPO, LISTAID, ASIGNA, ASIGNACION, OPASIGNA, IMPRIMIR, COND, 
+non terminal String     OPASIGNA;
+non terminal Object     S0, INICIO, SENTSHTML, SENTHTML, SENTSHEAD, SENTHEAD, SENTSTITLE, SENTTITLE, SENTSBODY, SENTBODY, SENTSTABLE, SENTTABLE, 
+                        SENTSROW, SENTROW, SENTSP, SENTP, EPS, CPREPORT, DECLARACION, TIPO, LISTAID, ASIGNA, ASIGNACION, IMPRIMIR, COND, 
                         RELACIONAL, EXP, LLAMADA, LLAMAR, ARRAY, TEXTOPLANO;
    
 
@@ -99,13 +114,9 @@ S0 ::=  S0 INICIO
         ;
 
 INICIO ::=  DOLLAR CPREPORT DOLLAR
-            | OPMEN HTML OPMAY OPSHTML OPMEN OPDIV HTML OPMAY
+            | OPMEN HTML OPMAY  {: parser.textohtml += "<html>"; :} SENTSHTML OPMEN OPDIV HTML OPMAY {: parser.textohtml += "</html>"; :}
             | error OPMAY
             | TEXTOPLANO
-            ;
-
-OPSHTML ::= SENTSHTML
-            | EPS
             ;
 
 SENTSHTML ::=   SENTSHTML SENTHTML
@@ -113,8 +124,8 @@ SENTSHTML ::=   SENTSHTML SENTHTML
                 ;
 
 SENTHTML ::=    DOLLAR CPREPORT DOLLAR
-                | OPMEN HEAD OPMAY SENTSHEAD OPMEN OPDIV HEAD OPMAY
-                | OPMEN BODY OPMAY SENTSBODY OPMEN OPDIV BODY OPMAY
+                | OPMEN HEAD OPMAY {: parser.textohtml += "<head>"; :} SENTSHEAD OPMEN OPDIV HEAD OPMAY {:parser.textohtml += "</head>"; :}
+                | OPMEN BODY OPMAY {: parser.textohtml += "<body>"; :} SENTSBODY OPMEN OPDIV BODY OPMAY {:parser.textohtml += "</body>"; :}
                 | error OPMAY
                 | TEXTOPLANO
                 ;
@@ -124,7 +135,7 @@ SENTSHEAD ::=   SENTSHEAD SENTHEAD
                 ;
 
 SENTHEAD ::=    DOLLAR CPREPORT DOLLAR
-                | OPMEN TITLE OPMAY SENTSTITLE OPMEN OPDIV TITLE OPMAY
+                | OPMEN TITLE OPMAY {: parser.textohtml += "<title>"; :} SENTSTITLE OPMEN OPDIV TITLE OPMAY {:parser.textohtml += "</title>"; :}
                 | error OPMAY
                 | TEXTOPLANO
                 ;
@@ -142,17 +153,17 @@ SENTSBODY ::=   SENTSBODY SENTBODY
                 ;
 
 SENTBODY ::=    DOLLAR CPREPORT DOLLAR
-                | OPMEN H1 OPMAY SENTSTITLE OPMEN OPDIV H1 OPMAY
-                | OPMEN H2 OPMAY SENTSTITLE OPMEN OPDIV H2 OPMAY
-                | OPMEN H3 OPMAY SENTSTITLE OPMEN OPDIV H3 OPMAY
-                | OPMEN H4 OPMAY SENTSTITLE OPMEN OPDIV H4 OPMAY
-                | OPMEN H5 OPMAY SENTSTITLE OPMEN OPDIV H5 OPMAY
-                | OPMEN H6 OPMAY SENTSTITLE OPMEN OPDIV H6 OPMAY
-                | OPMEN TABLE OPMAY SENTSTABLE OPMEN OPDIV TABLE OPMAY
-                | OPMEN DIV OPMAY SENTSBODY OPMEN OPDIV DIV OPMAY
-                | OPMEN P OPMAY SENTSP OPMEN OPDIV P OPMAY
-                | OPMEN HR OPMAY 
-                | OPMEN BR OPMAY
+                | OPMEN H1 OPMAY {: parser.textohtml += "<h1>"; :}  SENTSTITLE OPMEN OPDIV H1 OPMAY {:parser.textohtml += "</h1>"; :}
+                | OPMEN H2 OPMAY {: parser.textohtml += "<h2>"; :}  SENTSTITLE OPMEN OPDIV H2 OPMAY {:parser.textohtml += "</h2>"; :}
+                | OPMEN H3 OPMAY {: parser.textohtml += "<h3>"; :}  SENTSTITLE OPMEN OPDIV H3 OPMAY {:parser.textohtml += "</h3>"; :}
+                | OPMEN H4 OPMAY {: parser.textohtml += "<h4>"; :}  SENTSTITLE OPMEN OPDIV H4 OPMAY {:parser.textohtml += "</h4>"; :}
+                | OPMEN H5 OPMAY {: parser.textohtml += "<h5>"; :}  SENTSTITLE OPMEN OPDIV H5 OPMAY {:parser.textohtml += "</h5>"; :}
+                | OPMEN H6 OPMAY {: parser.textohtml += "<h6>"; :}  SENTSTITLE OPMEN OPDIV H6 OPMAY {:parser.textohtml += "</h6>"; :}
+                | OPMEN TABLE OPMAY {: parser.textohtml += "<table>"; :}  SENTSTABLE OPMEN OPDIV TABLE OPMAY {:parser.textohtml += "</table>"; :}
+                | OPMEN DIV OPMAY {: parser.textohtml += "<div>"; :}  SENTSBODY OPMEN OPDIV DIV OPMAY {:parser.textohtml += "</div>"; :}
+                | OPMEN P OPMAY {: parser.textohtml += "<p>"; :}  SENTSP OPMEN OPDIV P OPMAY {:parser.textohtml += "</p>"; :}
+                | OPMEN HR OPMAY {: parser.textohtml += "<hr>"; :} 
+                | OPMEN BR OPMAY {: parser.textohtml += "<br>"; :} 
                 | error OPMAY
                 | TEXTOPLANO
                 ;
@@ -162,7 +173,7 @@ SENTSTABLE ::=  SENTSTABLE SENTTABLE
                 ;
 
 SENTTABLE ::=   DOLLAR CPREPORT DOLLAR
-                | OPMEN TR OPMAY SENTSROW OPMEN OPDIV TR OPMAY
+                | OPMEN TR OPMAY {: parser.textohtml += "<tr>"; :} SENTSROW OPMEN OPDIV TR OPMAY {: parser.textohtml += "</tr>"; :}
                 | error OPMAY
                 | TEXTOPLANO
                 ;
@@ -172,8 +183,8 @@ SENTSROW ::=    SENTSROW SENTROW
                 ;
 
 SENTROW ::= DOLLAR CPREPORT DOLLAR
-            | OPMEN TH OPMAY SENTSBODY OPMEN OPDIV TH OPMAY
-            | OPMEN TD OPMAY SENTSBODY OPMEN OPDIV TH OPMAY
+            | OPMEN TH OPMAY {: parser.textohtml += "<th>"; :} SENTSBODY OPMEN OPDIV TH OPMAY {:parser.textohtml += "</th>"; :}
+            | OPMEN TD OPMAY {: parser.textohtml += "<td>"; :} SENTSBODY OPMEN OPDIV TD OPMAY {:parser.textohtml += "</td>"; :}
             | error OPMAY
             | TEXTOPLANO
             ;
@@ -183,8 +194,8 @@ SENTSP ::=  SENTSP SENTP
             ;
 
 SENTP ::=   DOLLAR CPREPORT DOLLAR
-            | OPMEN HR OPMAY
-            | OPMEN BR OPMAY
+            | OPMEN HR OPMAY {: parser.textohtml += "<hr>"; :}
+            | OPMEN BR OPMAY {: parser.textohtml += "<br>"; :}
             | TEXTOPLANO
             ;
 
@@ -218,10 +229,10 @@ ASIGNA ::=  OPIGUAL COND
 ASIGNACION ::=  ID OPASIGNA COND PCOMA
                 ;
 
-OPASIGNA ::=    OPIGUAL
-                | OPASIGSUMA
-                | OPASIGRESTA
-                | OPASIGMULT
+OPASIGNA ::=    OPIGUAL         {: RESULT = "="; :}
+                | OPASIGSUMA    {: RESULT = "+="; :}
+                | OPASIGRESTA   {: RESULT = "-="; :}
+                | OPASIGMULT    {: RESULT = "*="; :}
                 ;
 
 IMPRIMIR ::=    PRINT PARA COND PARC PCOMA
@@ -273,63 +284,64 @@ ARRAY ::=   VARIABLES
             | CLASES
             ;
 
-TEXTOPLANO ::=  TEXTOHTML
-                | CADENA
-                | ID
-                | ENTERO
-                | DECIMAL
-                | FONT
-                | ALIGN
-                | TEXTCOLOR
-                | COLOR
-                | HR
-                | BR
-                | P
-                | DIV
-                | TR
-                | TD
-                | TH
-                | TABLE
-                | H1
-                | H2
-                | H3
-                | H4
-                | H5
-                | H6
-                | TITLE
-                | BODY
-                | HEAD
-                | HTML
-                | PRINT
-                | TIPO
-                | CLASES
-                | METODOS
-                | CANTIDAD
-                | NOMBRE
-                | VARIABLES
-                | SCORE
-                | RESULT
-                | OPNOT
-                | OPOR
-                | OPAND
-                | OPDISTINTO
-                | OPCOMPARADOR
-                | OPMAYIGUAL
-                | OPMENIGUAL
-                | OPMAY
-                | OPMODULO
-                | OPDIV
-                | OPMULT
-                | OPSUMA
-                | OPRESTA
-                | CORA
-                | CORC
-                | COMA
-                | PUNTO
-                | PCOMA
-                | PARA
-                | PARC
-                | OPINCREMENT
-                | OPDECREMENT
-                | OPASIGNA
+TEXTOPLANO ::=  TEXTOHTML:t     {: parser.textohtml += t; :}
+                | CADENA:c      {: parser.textohtml += c; :}
+                | ID:id         {: parser.textohtml += id; :}
+                | ENTERO:e      {: parser.textohtml += e; :}
+                | DECIMAL:d     {: parser.textohtml += d; :}
+                | FONT          {: parser.textohtml += "font"; :}
+                | ALIGN         {: parser.textohtml += "align"; :}
+                | TEXTCOLOR     {: parser.textohtml += "textcolor"; :}
+                | COLOR         {: parser.textohtml += "color"; :}
+                | HR            {: parser.textohtml += "hr"; :}
+                | BR            {: parser.textohtml += "br"; :}
+                | P             {: parser.textohtml += "p"; :}
+                | DIV           {: parser.textohtml += "div"; :}
+                | TR            {: parser.textohtml += "tr"; :}
+                | TD            {: parser.textohtml += "td"; :}
+                | TH            {: parser.textohtml += "th"; :}
+                | TABLE         {: parser.textohtml += "table"; :}
+                | H1            {: parser.textohtml += "h1"; :}
+                | H2            {: parser.textohtml += "h2"; :}
+                | H3            {: parser.textohtml += "h3"; :}
+                | H4            {: parser.textohtml += "h4"; :}
+                | H5            {: parser.textohtml += "h5"; :}
+                | H6            {: parser.textohtml += "h6"; :}
+                | TITLE         {: parser.textohtml += "title"; :}
+                | BODY          {: parser.textohtml += "body"; :}
+                | HEAD          {: parser.textohtml += "head"; :}
+                | HTML          {: parser.textohtml += "html"; :}
+                | PRINT         {: parser.textohtml += "print"; :}
+                | TIPO          {: parser.textohtml += "tipo"; :}
+                | CLASES        {: parser.textohtml += "clases"; :}
+                | METODOS       {: parser.textohtml += "metodos"; :}
+                | CANTIDAD      {: parser.textohtml += "cantidad"; :}
+                | NOMBRE        {: parser.textohtml += "nombre"; :}
+                | VARIABLES     {: parser.textohtml += "variables"; :}
+                | SCORE         {: parser.textohtml += "score"; :}
+                | RESULT        {: parser.textohtml += "result"; :}
+                | OPNOT         {: parser.textohtml += "!"; :}
+                | OPOR          {: parser.textohtml += "||"; :}
+                | OPAND         {: parser.textohtml += "&&"; :}
+                | OPDISTINTO    {: parser.textohtml += "!="; :}
+                | OPCOMPARADOR  {: parser.textohtml += "=="; :}
+                | OPMAYIGUAL    {: parser.textohtml += ">="; :}
+                | OPMENIGUAL    {: parser.textohtml += "<="; :} 
+                | OPMEN         {: parser.textohtml += "<"; :}
+                | OPMAY         {: parser.textohtml += ">"; :}
+                | OPMODULO      {: parser.textohtml += "%"; :}
+                | OPDIV         {: parser.textohtml += "/"; :}
+                | OPMULT        {: parser.textohtml += "*"; :}
+                | OPSUMA        {: parser.textohtml += "+"; :}
+                | OPRESTA       {: parser.textohtml += "-"; :}
+                | CORA          {: parser.textohtml += "["; :}
+                | CORC          {: parser.textohtml += "]"; :}
+                | COMA          {: parser.textohtml += ","; :}
+                | PUNTO         {: parser.textohtml += "."; :}
+                | PCOMA         {: parser.textohtml += ";"; :}
+                | PARA          {: parser.textohtml += "("; :}
+                | PARC          {: parser.textohtml += ")"; :}
+                | OPINCREMENT   {: parser.textohtml += "++"; :}
+                | OPDECREMENT   {: parser.textohtml += "--"; :}
+                | OPASIGNA:t    {: parser.textohtml += t; :}      
                 ;

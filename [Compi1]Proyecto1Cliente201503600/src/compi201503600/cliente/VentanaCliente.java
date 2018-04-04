@@ -3,15 +3,21 @@ package compi201503600.cliente;
 import com.icesoft.faces.component.tree.IceUserObject;
 import compi201503600.analisis.json.ScannerLexJson;
 import compi201503600.analisis.json.ScannerSintaxJson;
+import compi201503600.analisis.report.ScannerLexReport;
+import compi201503600.analisis.report.ScannerSintaxReport;
 import compi201503600.beans.Result;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
@@ -20,15 +26,21 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
+import javax.swing.BoxLayout;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextPane;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.text.AttributeSet;
+import javax.swing.text.BadLocationException;
 import javax.swing.text.SimpleAttributeSet;
 import javax.swing.text.StyleConstants;
 import javax.swing.text.StyleContext;
@@ -73,11 +85,17 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
         mn_delete.addActionListener(this);
         mn_chargeProject.addActionListener(this);
         mn_analizeProject.addActionListener(this);
+        jMenuItem90.addActionListener(this);
         tabReport.addChangeListener(this);
         arbolProyectos.addMouseListener(this);
         
-        pathFolder = new ArrayList<String>();
-        archivos = new ArrayList<String>();
+        pathFolder = new ArrayList<>();
+        archivos = new ArrayList<>();
+        contentTabs = new ArrayList<>();
+        pathTabs = new ArrayList<>();
+        pathTabs.add("");
+        addTab("");
+        indexTab = 0;
         
         // Ventana de configuracion inicial
         VentanaConfiguracion vc = new VentanaConfiguracion(this);
@@ -102,29 +120,89 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
         }
         
         output = new ConexionServidor(socket, jTextPane1);
+        Cursor c = new Cursor();
+        c.start();
     }
         
     private JFileChooser seleccionador;
+    private int indexTab;
     @Override
     public void actionPerformed(ActionEvent e) {
         if (e.getSource() == mn_create){
-            
+            pathTabs.add("");
+            addTab("");
         }
-        else if (e.getSource() == mn_open){
+        else if (e.getSource() == mn_open){            
             seleccionador = new JFileChooser();
             seleccionador.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            FileNameExtensionFilter filtro = new FileNameExtensionFilter("CPReport files (*.cp)", "cp");
+            seleccionador.setFileFilter(filtro);
             int opcion = seleccionador.showOpenDialog(this);
             if (opcion == JFileChooser.APPROVE_OPTION){
                 File archivo = seleccionador.getSelectedFile();
-                
-                
+                pathTabs.add(archivo.getAbsolutePath());
+                addTab(archivo.getName());
             }
         }
         else if (e.getSource() == mn_save){
-            
+            if (pathTabs.get(indexTab).equals("")){
+                seleccionador = new JFileChooser();
+                FileNameExtensionFilter filtro = new FileNameExtensionFilter("CPReport files (*.cp)", "cp");
+                seleccionador.setFileFilter(filtro);
+                int opcion = seleccionador.showSaveDialog(this);
+                if (opcion == JFileChooser.APPROVE_OPTION){
+                    File archivo = new File(seleccionador.getSelectedFile().getAbsolutePath() + ".cp");
+                    pathTabs.set(indexTab, seleccionador.getSelectedFile().getAbsolutePath());
+                    tabReport.setTitleAt(indexTab, seleccionador.getSelectedFile().getName() + ".cp");
+                    BufferedWriter bw;
+                    try {
+                        bw = new BufferedWriter(new FileWriter(archivo));
+                        bw.write(((JTextArea)((JScrollPane)((JPanel)contentTabs.get(indexTab)).getComponent(0)).getViewport().getView()).getText());
+                        bw.close();
+                    } catch (IOException ex) {
+                        java.util.logging.Logger.getLogger(VentanaCliente.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }else{
+                File archivo = new File(pathTabs.get(indexTab));
+                BufferedWriter bw;
+                try {
+                    bw = new BufferedWriter(new FileWriter(archivo));
+                    bw.write(((JTextArea)((JScrollPane)((JPanel)contentTabs.get(indexTab)).getComponent(0)).getViewport().getView()).getText());
+                    bw.close();
+                } catch (IOException ex) {
+                    java.util.logging.Logger.getLogger(VentanaCliente.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
         else if (e.getSource() == mn_delete){
-            
+            try{
+                if (pathTabs.get(indexTab).equals("")){
+                    int aux = indexTab;
+                    tabReport.remove(indexTab);
+                    contentTabs.remove(aux);
+                    pathTabs.remove(aux);
+                }else{
+                    try {
+                        File file = new File(pathTabs.get(indexTab));
+                        if (file.delete()) {
+                            System.out.println(file.getName() + " is deleted!");
+                            int aux = indexTab;
+                            tabReport.remove(indexTab);
+                            contentTabs.remove(aux);
+                            pathTabs.remove(aux);
+                        } else {
+                            System.out.println("Delete operation is failed.");
+                        }
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                }
+                if (tabReport.getTabCount() == 0){
+                    pathTabs.add("");
+                    addTab("");
+                }
+            }catch(Exception a){}
         }
         else if (e.getSource() == mn_chargeProject){
             seleccionador = new JFileChooser();
@@ -149,7 +227,15 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
             if (archivos.size() == 2){
                 output.enviarMensaje(archivos.get(0) + ";" + archivos.get(1));
             }else
-                JOptionPane.showMessageDialog(this, "Deben cargarse dos archivos", "Advertencia", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(this, "Deben cargarse dos proyectos", "Advertencia", JOptionPane.ERROR_MESSAGE);
+        }
+        else if (e.getSource() == mn_analizar){
+            try{
+                JTextArea textArea = ((JTextArea)((JScrollPane)((JPanel)contentTabs.get(indexTab)).getComponent(0)).getViewport().getView());
+                ScannerSintaxReport sintax = new ScannerSintaxReport(new ScannerLexReport(new ByteArrayInputStream(textArea.getText().getBytes(StandardCharsets.UTF_8))));
+                sintax.parse();
+                JOptionPane.showMessageDialog(this, sintax.getHtml());
+            }catch(Exception ex){}
         }
     }
     
@@ -195,11 +281,80 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
     private ArrayList<String> pathTabs;
     @Override
     public void stateChanged(ChangeEvent e) {
-        
+        try{
+            contentTabs.get(indexTab).setVisible(false);
+            indexTab = tabReport.getSelectedIndex();
+            contentTabs.get(indexTab).setVisible(true);
+        }catch(Exception ex){}
     }
     
-    public JTextPane getConsola(){
-        return jTextPane1;
+    private void addTab(String nombre){
+        JPanel panel = new JPanel();
+        panel.setBounds(5, 5, tabReport.getWidth() - 10, tabReport.getHeight() - 10);
+        JPanel contador = new JPanel();
+        JScrollPane scroll = new JScrollPane();
+        scroll.setBounds(0, 0, panel.getWidth(), panel.getHeight());
+        contador.setLayout(new BoxLayout(contador, BoxLayout.Y_AXIS));
+        panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
+        scroll.setRowHeaderView(contador);
+        for(int i = 0; i < 1000; i++)
+            ((JPanel)scroll.getRowHeader().getView()).add(new JLabel(String.valueOf(i + 1)));
+        JTextArea area = new JTextArea();
+        area.setBounds(0, 0, scroll.getWidth(), scroll.getHeight());
+        scroll.setViewportView(area);
+        panel.add(scroll);
+        contentTabs.add(panel);
+        if (pathTabs.get(pathTabs.size() - 1).equals(""))
+            tabReport.addTab("Nuevo", panel);
+        else{
+            try {
+                File arch = new File(pathTabs.get(pathTabs.size() - 1));
+                FileReader fr = new FileReader(arch);
+                BufferedReader br = new BufferedReader(fr);
+
+                // Lectura del fichero
+                String linea;
+                while ((linea = br.readLine()) != null)
+                    area.setText(area.getText() + "\n" + linea);
+                fr.close();
+                tabReport.addTab(nombre, panel);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            
+        } 
+        tabReport.setSelectedIndex(pathTabs.size() - 1);
+    }
+    
+    public class Cursor extends Thread {
+        
+        public Cursor() {
+            super();
+        }
+
+        public void run() {
+            while(true){
+                try{
+                    JTextArea textArea = ((JTextArea)((JScrollPane)((JPanel)contentTabs.get(indexTab)).getComponent(0)).getViewport().getView());
+                    int caretPosition = textArea.getCaretPosition();
+                    int row = 0;
+                    try {
+                        row = textArea.getLineOfOffset(caretPosition);
+                    } catch (BadLocationException ex) {
+                        java.util.logging.Logger.getLogger(VentanaCliente.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    int column = 0;
+                    try {
+                        column = caretPosition - textArea.getLineStartOffset(row);
+                    } catch (BadLocationException ex) {
+                        java.util.logging.Logger.getLogger(VentanaCliente.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    lblPosition.setText("Linea " + (row+1) + ", Columna " + column);
+                }catch(Exception e){
+                    lblPosition.setText("Linea 0, Columna 0");
+                }
+            }
+        }
     }
     
      // Agrega un texto al editor de Java de un color especifico
@@ -232,6 +387,7 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
         jTabbedPane3 = new javax.swing.JTabbedPane();
         jScrollPane1 = new javax.swing.JScrollPane();
         jTextPane1 = new javax.swing.JTextPane();
+        lblPosition = new javax.swing.JLabel();
         jMenuBar1 = new javax.swing.JMenuBar();
         jMenu1 = new javax.swing.JMenu();
         mn_create = new javax.swing.JMenuItem();
@@ -241,7 +397,8 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
         jMenu2 = new javax.swing.JMenu();
         mn_chargeProject = new javax.swing.JMenuItem();
         mn_analizeProject = new javax.swing.JMenuItem();
-        jMenu3 = new javax.swing.JMenu();
+        jMenuItem90 = new javax.swing.JMenu();
+        mn_analizar = new javax.swing.JMenuItem();
         jMenu4 = new javax.swing.JMenu();
 
         jMenuItem7.setText("jMenuItem7");
@@ -266,18 +423,20 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
 
         jTabbedPane3.addTab("Consola", jScrollPane1);
 
+        lblPosition.setText("Linea 0, Columna 0");
+
         jMenu1.setText("Archivo");
 
-        mn_create.setText("Crear");
+        mn_create.setText("Nuevo reporte");
         jMenu1.add(mn_create);
 
-        mn_open.setText("Abrir");
+        mn_open.setText("Abrir reporte");
         jMenu1.add(mn_open);
 
-        mn_save.setText("Guardar");
+        mn_save.setText("Guardar reporte");
         jMenu1.add(mn_save);
 
-        mn_delete.setText("Eliminar");
+        mn_delete.setText("Eliminar reporte");
         jMenu1.add(mn_delete);
 
         jMenuBar1.add(jMenu1);
@@ -292,8 +451,12 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
 
         jMenuBar1.add(jMenu2);
 
-        jMenu3.setText("Analizar");
-        jMenuBar1.add(jMenu3);
+        jMenuItem90.setText("Analizar");
+
+        mn_analizar.setText("Analizar reporte");
+        jMenuItem90.add(mn_analizar);
+
+        jMenuBar1.add(jMenuItem90);
 
         jMenu4.setText("Reportes");
         jMenuBar1.add(jMenu4);
@@ -309,15 +472,18 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(tabReport, javax.swing.GroupLayout.DEFAULT_SIZE, 608, Short.MAX_VALUE)
-                    .addComponent(jTabbedPane3))
+                    .addComponent(jTabbedPane3)
+                    .addComponent(lblPosition, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jTabbedPane1)
             .addGroup(layout.createSequentialGroup()
-                .addComponent(tabReport, javax.swing.GroupLayout.PREFERRED_SIZE, 495, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(tabReport, javax.swing.GroupLayout.PREFERRED_SIZE, 483, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(3, 3, 3)
+                .addComponent(lblPosition)
+                .addGap(1, 1, 1)
                 .addComponent(jTabbedPane3, javax.swing.GroupLayout.DEFAULT_SIZE, 100, Short.MAX_VALUE))
         );
 
@@ -360,14 +526,16 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
     private javax.swing.JTree arbolProyectos;
     private javax.swing.JMenu jMenu1;
     private javax.swing.JMenu jMenu2;
-    private javax.swing.JMenu jMenu3;
     private javax.swing.JMenu jMenu4;
     private javax.swing.JMenuBar jMenuBar1;
     private javax.swing.JMenuItem jMenuItem7;
+    private javax.swing.JMenu jMenuItem90;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JTabbedPane jTabbedPane1;
     private javax.swing.JTabbedPane jTabbedPane3;
     private javax.swing.JTextPane jTextPane1;
+    private javax.swing.JLabel lblPosition;
+    private javax.swing.JMenuItem mn_analizar;
     private javax.swing.JMenuItem mn_analizeProject;
     private javax.swing.JMenuItem mn_chargeProject;
     private javax.swing.JMenuItem mn_create;
@@ -482,6 +650,8 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
                     sintaxJson.parse();
                     Result objeto = sintaxJson.getResult();
                     appendToPane(jTextPane1, "Respuesta analizada!", Color.BLUE);
+                    VentanaResult v = new VentanaResult(objeto);
+                    v.setVisible(true);
                 } catch (IOException ex) {
                     appendToPane(jTextPane1, "Error al leer del stream de entrada: " + ex.getMessage(), Color.RED);
                     log.error("Error al leer del stream de entrada: " + ex.getMessage());
