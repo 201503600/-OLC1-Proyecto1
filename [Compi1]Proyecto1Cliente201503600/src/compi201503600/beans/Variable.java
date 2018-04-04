@@ -15,6 +15,31 @@ public class Variable {
     private String metodo;
     private String clase;
 
+    public Variable() {
+        this.nombre = "";
+        this.tipo = "";
+        this.metodo = "";
+        this.clase = "";
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+
+    public void setTipo(String tipo) {
+        this.tipo = tipo;
+    }
+
+    public void setMetodo(String metodo) {
+        this.metodo = metodo;
+    }
+
+    public void setClase(String clase) {
+        this.clase = clase;
+    }
+    
+    
+
     public Variable(String nombre, String tipo, String metodo, String clase) {
         this.nombre = nombre;
         this.tipo = tipo;

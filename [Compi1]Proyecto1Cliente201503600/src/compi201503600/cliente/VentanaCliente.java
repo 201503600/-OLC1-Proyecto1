@@ -1,17 +1,23 @@
 package compi201503600.cliente;
 
 import com.icesoft.faces.component.tree.IceUserObject;
+import compi201503600.analisis.json.ScannerLexJson;
+import compi201503600.analisis.json.ScannerSintaxJson;
+import compi201503600.beans.Result;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JFileChooser;
@@ -471,7 +477,11 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
                 try {
                     response = entradaDatos.readUTF();
                     JOptionPane.showMessageDialog(null, response);
-                    
+                    appendToPane(jTextPane1, "Analizando respuesta de servidor ...", Color.GRAY);
+                    ScannerSintaxJson sintaxJson = new ScannerSintaxJson(new ScannerLexJson(new ByteArrayInputStream(response.getBytes(StandardCharsets.UTF_8))));
+                    sintaxJson.parse();
+                    Result objeto = sintaxJson.getResult();
+                    appendToPane(jTextPane1, "Respuesta analizada!", Color.BLUE);
                 } catch (IOException ex) {
                     appendToPane(jTextPane1, "Error al leer del stream de entrada: " + ex.getMessage(), Color.RED);
                     log.error("Error al leer del stream de entrada: " + ex.getMessage());
@@ -480,6 +490,8 @@ public class VentanaCliente extends javax.swing.JFrame implements ActionListener
                     appendToPane(jTextPane1, "El socket no se creo correctamente", Color.RED);
                     log.error("El socket no se creo correctamente. ");
                     conectado = false;
+                } catch (Exception ex) {
+                    java.util.logging.Logger.getLogger(VentanaCliente.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
     }

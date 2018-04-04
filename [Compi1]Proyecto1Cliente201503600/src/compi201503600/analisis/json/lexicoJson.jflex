@@ -20,15 +20,15 @@ import java.io.Reader;
 
 %{
 
-    /*  Generamos un java_cup.Symbol para guardar el tipo de token 
+    /*  Generamos un java_cup.symbol para guardar el tipo de token 
         encontrado */
-    private Symbol Symbol(int type) {
+    private Symbol symbol(int type) {
         return new Symbol(type, yyline, yycolumn);
     }
     
-    /* Generamos un Symbol para el tipo de token encontrado 
+    /* Generamos un symbol para el tipo de token encontrado 
        junto con su valor */
-    private Symbol Symbol(int type, Object value) {
+    private Symbol symbol(int type, Object value) {
         return new Symbol(type, yyline, yycolumn, value);
     }
 %}
@@ -44,29 +44,29 @@ ENTER   = [ \ \n]
 
 %%
 
-<YYINITIAL> "{"             { return new Symbol(sym.LLAVEIZQ, yyline, yycolumn, yytext()); }
-<YYINITIAL> "}"             { return new Symbol(sym.LLAVEDER, yyline, yycolumn, yytext()); }
-<YYINITIAL> "["             { return new Symbol(sym.CORCHIZQ, yyline, yycolumn, yytext()); }
-<YYINITIAL> "]"             { return new Symbol(sym.CORCHDER, yyline, yycolumn, yytext()); }
-<YYINITIAL> ":"             { return new Symbol(sym.DPUNTOS, yyline, yycolumn, yytext()); }
-<YYINITIAL> ","             { return new Symbol(sym.COMA, yyline, yycolumn, yytext()); }
+<YYINITIAL> "{"             { return symbol(sym.LLAVEIZQ); }
+<YYINITIAL> "}"             { return symbol(sym.LLAVEDER); }
+<YYINITIAL> "["             { return symbol(sym.CORCHIZQ); }
+<YYINITIAL> "]"             { return symbol(sym.CORCHDER); }
+<YYINITIAL> ":"             { return symbol(sym.DPUNTOS); }
+<YYINITIAL> ","             { return symbol(sym.COMA); }
 
-<YYINITIAL> "score"         { return new Symbol(sym.SCORE, yyline, yycolumn, yytext()); }
-<YYINITIAL> "clases"        { return new Symbol(sym.CLASES, yyline, yycolumn, yytext()); }
-<YYINITIAL> "variables"     { return new Symbol(sym.VARIABLES, yyline, yycolumn, yytext()); }
-<YYINITIAL> "metodos"       { return new Symbol(sym.METODOS, yyline, yycolumn, yytext()); }
-<YYINITIAL> "comentarios"   { return new Symbol(sym.COMENTARIOS, yyline, yycolumn, yytext()); }
-<YYINITIAL> "nombre"        { return new Symbol(sym.NOMBRE, yyline, yycolumn, yytext()); }
-<YYINITIAL> "tipo"          { return new Symbol(sym.TIPO, yyline, yycolumn, yytext()); }
-<YYINITIAL> "funcion"       { return new Symbol(sym.FUNCION, yyline, yycolumn, yytext()); }
-<YYINITIAL> "clase"         { return new Symbol(sym.CLASE, yyline, yycolumn, yytext()); }
-<YYINITIAL> "parametros"    { return new Symbol(sym.PARAMETROS, yyline, yycolumn, yytext()); }
-<YYINITIAL> "texto"         { return new Symbol(sym.TEXTO, yyline, yycolumn, yytext()); }
+<YYINITIAL> "score"         { return symbol(sym.SCORE); }
+<YYINITIAL> "clases"        { return symbol(sym.CLASES); }
+<YYINITIAL> "variables"     { return symbol(sym.VARIABLES); }
+<YYINITIAL> "metodos"       { return symbol(sym.METODOS); }
+<YYINITIAL> "comentarios"   { return symbol(sym.COMENTARIOS); }
+<YYINITIAL> "nombre"        { return symbol(sym.NOMBRE); }
+<YYINITIAL> "tipo"          { return symbol(sym.TIPO); }
+<YYINITIAL> "funcion"       { return symbol(sym.FUNCION); }
+<YYINITIAL> "clase"         { return symbol(sym.CLASE); }
+<YYINITIAL> "parametros"    { return symbol(sym.PARAMETROS); }
+<YYINITIAL> "texto"         { return symbol(sym.TEXTO); }
 
-<YYINITIAL> {ENTERO}       { return new Symbol(sym.ENTERO, yyline, yycolumn,yytext());}
-<YYINITIAL> {DECIMAL}      { return new Symbol(sym.DECIMAL, yyline, yycolumn, yytext());}
-<YYINITIAL> {ID}           { return new Symbol(sym.ID, yyline, yycolumn,yytext());}
-<YYINITIAL> [\"]           { yybegin(CADENA); text = "\"";}
+<YYINITIAL> {ENTERO}       { return symbol(sym.ENTERO,yytext());}
+<YYINITIAL> {DECIMAL}      { return symbol(sym.DECIMAL, yytext());}
+<YYINITIAL> {ID}           { return symbol(sym.ID,yytext());}
+<YYINITIAL> [\"]           { yybegin(CADENA); text = "";}
 
 <YYINITIAL> {SPACE}        { /*Espacios en blanco, ignorados*/ }
 <YYINITIAL> {ENTER}        { /*Saltos de linea, ignorados*/}
@@ -75,10 +75,10 @@ ENTER   = [ \ \n]
 
 <CADENA> {
         [\"]    { 
-                    String tmp = text + "\""; 
+                    String tmp = text; 
                     text = ""; 
                     yybegin(YYINITIAL);  
-                    return new Symbol(sym.CADENA, yychar,yyline,tmp); 
+                    return symbol(sym.CADENA,tmp); 
                 }
         [\n]    {
                     text = "";  

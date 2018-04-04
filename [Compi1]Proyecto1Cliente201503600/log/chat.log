@@ -59,3 +59,14 @@
 2018-04-02 18:41:38,074 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
 2018-04-02 18:46:30,642 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
 2018-04-02 18:46:45,484 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 20:02:56,550 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 20:03:52,948 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 20:31:46,784 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 20:33:53,234 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 20:34:23,259 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 20:37:52,249 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset
+2018-04-02 23:05:57,370 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 23:10:14,929 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 23:12:01,844 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 23:19:21,013 [main] INFO  compi201503600.cliente.VentanaCliente - Conectando a localhost en el puerto 1234
+2018-04-02 23:37:31,652 [Thread-2] ERROR compi201503600.cliente.VentanaCliente - Error al leer del stream de entrada: Connection reset

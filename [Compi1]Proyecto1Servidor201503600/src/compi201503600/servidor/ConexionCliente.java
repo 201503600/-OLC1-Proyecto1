@@ -46,6 +46,8 @@ public class ConexionCliente extends Thread implements Observer{
         try {
             entradaDatos = new DataInputStream(socket.getInputStream());
             salidaDatos = new DataOutputStream(socket.getOutputStream());
+            listfirst = new ArrayList<>();
+            listsecond = new ArrayList<>();
             listclases = new ArrayList<>();
             listvars = new ArrayList<>();
             listcomments = new ArrayList<>();
@@ -72,7 +74,8 @@ public class ConexionCliente extends Thread implements Observer{
                 appendToPane(consola, "Proyecto " + archivo1.getName() + " recibido", Color.BLUE);
                 appendToPane(consola, "Proyecto " + archivo2.getName() + " recibido", Color.BLUE);
                 appendToPane(consola, "Iniciando analisis", Color.GRAY);
-                this.comparar(mensajeRecibido.split(";")[0], mensajeRecibido.split(";")[1]);
+                this.analizar(mensajeRecibido.split(";")[0], mensajeRecibido.split(";")[1]);
+                this.comparar();
                 // Pone el mensaje recibido en mensajes para que se notifique 
                 // a sus observadores que hay un nuevo mensaje.
                 sintonizador.setMensaje(mensajeRecibido);
@@ -94,6 +97,7 @@ public class ConexionCliente extends Thread implements Observer{
         }   
     }
     
+    private ArrayList<Clase> listfirst, listsecond;
     private ArrayList<String> listclases;
     private ArrayList<Variable> listvars;
     private ArrayList<String> listcomments;
@@ -102,7 +106,7 @@ public class ConexionCliente extends Thread implements Observer{
     private double vars = 0,varsRep = 0;
     private double comments = 0, commentsRep = 0;
     private double methods = 0, methodsRep = 0;
-    private void comparar(String dir1, String dir2) {
+    private void analizar(String dir1, String dir2) {
         //Apertura del primer directorio
         File arch1 = new File(dir1);
         //Conseguimos un listado de los archivos y subdirectorios
@@ -115,7 +119,7 @@ public class ConexionCliente extends Thread implements Observer{
 
                 //Si el archivo es un directorio volvemos a invocar el metodo.
                 if (tmp1.isDirectory()) {
-                    this.comparar(arch1.getCanonicalPath() + "/" + ficheros1[i], dir2);    
+                    this.analizar(arch1.getCanonicalPath() + "/" + ficheros1[i], dir2);    
                 } else {
                     // Si el archivo es .java, se procede a recorrer el segundo directorio
                     if (FilenameUtils.getExtension(tmp1.getAbsolutePath()).equals("java")){
@@ -131,7 +135,7 @@ public class ConexionCliente extends Thread implements Observer{
                                 File tmp2 = new File(arch2.getCanonicalPath() + "/" + ficheros2[j]);
                                 //Si el archivo es un directorio volvemos a invocar al metodo
                                 if (tmp2.isDirectory())
-                                    this.comparar(dir1, arch2.getCanonicalPath() + "/" + ficheros2[j]);
+                                    this.analizar(dir1, arch2.getCanonicalPath() + "/" + ficheros2[j]);
                                 else{
                                     //Si el archivo es .java, se procede a comparar ambos archivos
                                     if (FilenameUtils.getExtension(tmp2.getAbsolutePath()).equals("java")){
@@ -139,91 +143,11 @@ public class ConexionCliente extends Thread implements Observer{
                                         appendToPane(consola, "Analizando " + tmp1.getName() + " ...", Color.GRAY);
                                         sintax = new ScannerSintaxJava(new ScannerLexJava(new FileReader(tmp1.getAbsolutePath())));
                                         sintax.parse();
-                                        Clase clase1 = sintax.getNuevaClase();
+                                        listfirst.add(sintax.getNuevaClase());
                                         appendToPane(consola, "Analizando " + tmp2.getName() + " ...", Color.GRAY);
                                         sintax = new ScannerSintaxJava(new ScannerLexJava(new FileReader(tmp2.getAbsolutePath())));
                                         sintax.parse();
-                                        Clase clase2 = sintax.getNuevaClase();
-                                        
-                                        appendToPane(consola, "Comparando " + tmp1.getName() + " y " + tmp2.getName() + " ...", Color.BLUE);
-                                        
-                                        //Comparacion comentarios
-                                        for(String com1:clase1.getComentarios()){
-                                            comments++;
-                                            if (clase2.getComentarios().contains(com1)){
-                                                commentsRep++;
-                                                listcomments.add(com1);
-                                            }else
-                                                comments++;
-                                        }
-                                        
-                                        //Comparación de variables
-                                        for(Variable var1:clase1.getVariables()){
-                                            vars++;
-                                            for(Variable var2:clase2.getVariables()){
-                                                if (var1 == clase1.getVariables().get(0)){
-                                                    vars++;
-                                                    if (var1.getMetodo().equals("global") && var2.getMetodo().equals("global")){
-                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
-                                                            varsRep += 2;
-                                                            listvars.add(var1);
-                                                        }                                                           
-                                                    }else if (var1.getMetodo().equals("global") || var2.getMetodo().equals("global")){
-                                                        //vars++;
-                                                    }else{
-                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
-                                                            varsRep += 2;
-                                                            listvars.add(var1);
-                                                        }
-                                                    }
-                                                }else{
-                                                    if (var1.getMetodo().equals("global") && var2.getMetodo().equals("global")){
-                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
-                                                            varsRep += 2;
-                                                            listvars.add(var1);
-                                                        }
-                                                    }else if (var1.getMetodo().equals("global") || var2.getMetodo().equals("global")){
-                                                        //No se hace nada, var2 ya fue agregada y no esta en el mismo ambito que var1
-                                                    }else{
-                                                        if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())){
-                                                            varsRep += 2;
-                                                            listvars.add(var1);
-                                                        }
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        
-                                        //Comparación de metodos
-                                        boolean claseRep = false;
-                                        for(Metodo met1:clase1.getMetodos()){
-                                            methods++;
-                                            for(Metodo met2:clase2.getMetodos()){
-                                                if (met1 == clase1.getMetodos().get(0)){
-                                                    methods++;
-                                                    if (met1.getNombre().equals(met2.getNombre()) && met1.getTipo().equals(met2.getTipo()) &&
-                                                            met1.getParametros().size() == met2.getParametros().size()){
-                                                        methodsRep += 2;
-                                                        listmethods.add(met1);
-                                                        claseRep = true;
-                                                    }
-                                                }else{
-                                                    if (met1.getNombre().equals(met2.getNombre()) && met1.getTipo().equals(met2.getTipo()) &&
-                                                            met1.getParametros().size() == met2.getParametros().size()){
-                                                        methodsRep += 2;
-                                                        listmethods.add(met1);
-                                                        claseRep = true;
-                                                    }
-                                                }
-                                            }
-                                        }
-                                        
-                                        //Comparación de clase
-                                        if (claseRep && clase1.getNombre().equals(clase2.getNombre())){
-                                            clasesRep++;
-                                            listclases.add(clase1.getNombre());
-                                        }else
-                                            clases++;
+                                        listsecond.add(sintax.getNuevaClase());
                                         
                                     }
                                 }
@@ -240,14 +164,103 @@ public class ConexionCliente extends Thread implements Observer{
                 
                 i++;
             }
-            
-            appendToPane(consola, "\nGenerando Json ...", Color.GRAY);
-            generarJson();
-            appendToPane(consola, "Json generado!", Color.GREEN);
         } catch (IOException e) {
             appendToPane(consola, e.getMessage(), Color.RED);
         }
     } 
+    
+    private void comparar(){
+        
+        for(Clase clase1:listfirst){
+            comments += clase1.getComentarios().size();
+            vars += clase1.getVariables().size();
+            methods += clase1.getMetodos().size();
+            for(Clase clase2:listsecond){
+                appendToPane(consola, "Comparando " + clase1.getNombre() + " y " + clase2.getNombre() + " ...", Color.BLUE);
+                
+                 //Comparacion comentarios
+                for (String com1 : clase1.getComentarios()) {
+                    if (clase2.getComentarios().contains(com1)) {
+                        commentsRep++;
+                        listcomments.add(com1);
+                    } else {
+                        comments++;
+                    }
+                }
+                
+                //Comparación de variables
+                for (Variable var1 : clase1.getVariables()) {
+                    for (Variable var2 : clase2.getVariables()) {
+                        if (var1 == clase1.getVariables().get(0)) {
+                            vars++;
+                            if (var1.getMetodo().equals("global") && var2.getMetodo().equals("global")) {
+                                if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())) {
+                                    varsRep += 2;
+                                    listvars.add(var1);
+                                }
+                            } else if (var1.getMetodo().equals("global") || var2.getMetodo().equals("global")) {
+                                //vars++;
+                            } else {
+                                if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())) {
+                                    varsRep += 2;
+                                    listvars.add(var1);
+                                }
+                            }
+                        } else {
+                            if (var1.getMetodo().equals("global") && var2.getMetodo().equals("global")) {
+                                if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())) {
+                                    varsRep += 2;
+                                    listvars.add(var1);
+                                }
+                            } else if (var1.getMetodo().equals("global") || var2.getMetodo().equals("global")) {
+                                //No se hace nada, var2 ya fue agregada y no esta en el mismo ambito que var1
+                            } else {
+                                if (var1.getTipo().equals(var2.getTipo()) && var1.getNombre().equals(var2.getNombre())) {
+                                    varsRep += 2;
+                                    listvars.add(var1);
+                                }
+                            }
+                        }
+                    }
+                }
+                
+                //Comparación de metodos
+                boolean claseRep = false;
+                for (Metodo met1 : clase1.getMetodos()) {
+                    for (Metodo met2 : clase2.getMetodos()) {
+                        if (met1 == clase1.getMetodos().get(0)) {
+                            methods++;
+                            if (met1.getNombre().equals(met2.getNombre()) && met1.getTipo().equals(met2.getTipo())
+                                    && met1.getParametros().size() == met2.getParametros().size()) {
+                                methodsRep += 2;
+                                listmethods.add(met1);
+                                claseRep = true;
+                            }
+                        } else {
+                            if (met1.getNombre().equals(met2.getNombre()) && met1.getTipo().equals(met2.getTipo())
+                                    && met1.getParametros().size() == met2.getParametros().size()) {
+                                methodsRep += 2;
+                                listmethods.add(met1);
+                                claseRep = true;
+                            }
+                        }
+                    }
+                }
+                
+                //Comparación de clase
+                if (claseRep && clase1.getNombre().equals(clase2.getNombre())) {
+                    clasesRep++;
+                    listclases.add(clase1.getNombre());
+                } else {
+                    clases++;
+                }
+                
+            }
+        }   
+        appendToPane(consola, "\nGenerando Json ...", Color.GRAY);
+        generarJson();
+        appendToPane(consola, "Json generado!", Color.GREEN);
+    }
     
     private void generarJson(){
         DecimalFormat format = new DecimalFormat("#.00");
@@ -290,11 +303,14 @@ public class ConexionCliente extends Thread implements Observer{
         
         //Generando codigo comentarios
         json += ", comentarios:[";
-        for(String c:listcomments)
-            if (c.equals(listcomments.get(0)))
+        for(String c:listcomments){
+            if (c.startsWith("//"))
+                c = c.replace("\n", "");
+            if ((c + "\n").equals(listcomments.get(0)))
                 json += "{texto:\"" + c + "\"}";
             else
                 json += ", {texto:\"" + c + "\"}";
+        }
         json += "]";
         
         json += "}";
@@ -304,6 +320,8 @@ public class ConexionCliente extends Thread implements Observer{
         listvars = new ArrayList<>();
         listcomments = new ArrayList<>();
         listmethods = new ArrayList<>();
+        listfirst = new ArrayList<>();
+        listsecond = new ArrayList<>();
     }
     
     @Override

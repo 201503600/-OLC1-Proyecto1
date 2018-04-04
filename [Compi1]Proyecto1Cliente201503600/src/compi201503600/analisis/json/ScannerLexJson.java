@@ -11,7 +11,7 @@ import java.io.Reader;
  * <a href="http://www.jflex.de/">JFlex</a> 1.5.0-SNAPSHOT
  * from the specification file <tt>src/compi201503600/analisis/json/lexicoJson.jflex</tt>
  */
-class ScannerLexJson implements java_cup.runtime.Scanner {
+public class ScannerLexJson implements java_cup.runtime.Scanner {
 
   /** This character denotes the end of file */
   public static final int YYEOF = -1;
@@ -336,15 +336,15 @@ class ScannerLexJson implements java_cup.runtime.Scanner {
     //Código de usuario
     String text = "";
 
-    /*  Generamos un java_cup.Symbol para guardar el tipo de token 
+    /*  Generamos un java_cup.symbol para guardar el tipo de token 
         encontrado */
-    private Symbol Symbol(int type) {
+    private Symbol symbol(int type) {
         return new Symbol(type, yyline, yycolumn);
     }
     
-    /* Generamos un Symbol para el tipo de token encontrado 
+    /* Generamos un symbol para el tipo de token encontrado 
        junto con su valor */
-    private Symbol Symbol(int type, Object value) {
+    private Symbol symbol(int type, Object value) {
         return new Symbol(type, yyline, yycolumn, value);
     }
 
@@ -355,7 +355,7 @@ class ScannerLexJson implements java_cup.runtime.Scanner {
    *
    * @param   in  the java.io.Reader to read input from.
    */
-  ScannerLexJson(java.io.Reader in) {
+  public ScannerLexJson(java.io.Reader in) {
     this.zzReader = in;
   }
 
@@ -365,7 +365,7 @@ class ScannerLexJson implements java_cup.runtime.Scanner {
    *
    * @param   in  the java.io.Inputstream to read input from.
    */
-  ScannerLexJson(java.io.InputStream in) {
+  public ScannerLexJson(java.io.InputStream in) {
     this(new java.io.InputStreamReader
              (in, java.nio.charset.Charset.forName("UTF-8")));
   }
@@ -726,7 +726,7 @@ class ScannerLexJson implements java_cup.runtime.Scanner {
           }
         case 28: break;
         case 2: 
-          { return new Symbol(sym.ENTERO, yyline, yycolumn,yytext());
+          { return symbol(sym.ENTERO,yytext());
           }
         case 29: break;
         case 3: 
@@ -738,35 +738,35 @@ class ScannerLexJson implements java_cup.runtime.Scanner {
           }
         case 31: break;
         case 5: 
-          { return new Symbol(sym.ID, yyline, yycolumn,yytext());
+          { return symbol(sym.ID,yytext());
           }
         case 32: break;
         case 6: 
-          { return new Symbol(sym.LLAVEIZQ, yyline, yycolumn, yytext());
+          { return symbol(sym.LLAVEIZQ);
           }
         case 33: break;
         case 7: 
-          { return new Symbol(sym.LLAVEDER, yyline, yycolumn, yytext());
+          { return symbol(sym.LLAVEDER);
           }
         case 34: break;
         case 8: 
-          { return new Symbol(sym.CORCHIZQ, yyline, yycolumn, yytext());
+          { return symbol(sym.CORCHIZQ);
           }
         case 35: break;
         case 9: 
-          { return new Symbol(sym.CORCHDER, yyline, yycolumn, yytext());
+          { return symbol(sym.CORCHDER);
           }
         case 36: break;
         case 10: 
-          { return new Symbol(sym.DPUNTOS, yyline, yycolumn, yytext());
+          { return symbol(sym.DPUNTOS);
           }
         case 37: break;
         case 11: 
-          { return new Symbol(sym.COMA, yyline, yycolumn, yytext());
+          { return symbol(sym.COMA);
           }
         case 38: break;
         case 12: 
-          { yybegin(CADENA); text = "\"";
+          { yybegin(CADENA); text = "";
           }
         case 39: break;
         case 13: 
@@ -781,58 +781,58 @@ class ScannerLexJson implements java_cup.runtime.Scanner {
           }
         case 41: break;
         case 15: 
-          { String tmp = text + "\""; 
+          { String tmp = text; 
                     text = ""; 
                     yybegin(YYINITIAL);  
-                    return new Symbol(sym.CADENA, yychar,yyline,tmp);
+                    return symbol(sym.CADENA,tmp);
           }
         case 42: break;
         case 16: 
-          { return new Symbol(sym.DECIMAL, yyline, yycolumn, yytext());
+          { return symbol(sym.DECIMAL, yytext());
           }
         case 43: break;
         case 17: 
-          { return new Symbol(sym.TIPO, yyline, yycolumn, yytext());
+          { return symbol(sym.TIPO);
           }
         case 44: break;
         case 18: 
-          { return new Symbol(sym.SCORE, yyline, yycolumn, yytext());
+          { return symbol(sym.SCORE);
           }
         case 45: break;
         case 19: 
-          { return new Symbol(sym.CLASE, yyline, yycolumn, yytext());
+          { return symbol(sym.CLASE);
           }
         case 46: break;
         case 20: 
-          { return new Symbol(sym.TEXTO, yyline, yycolumn, yytext());
+          { return symbol(sym.TEXTO);
           }
         case 47: break;
         case 21: 
-          { return new Symbol(sym.CLASES, yyline, yycolumn, yytext());
+          { return symbol(sym.CLASES);
           }
         case 48: break;
         case 22: 
-          { return new Symbol(sym.NOMBRE, yyline, yycolumn, yytext());
+          { return symbol(sym.NOMBRE);
           }
         case 49: break;
         case 23: 
-          { return new Symbol(sym.METODOS, yyline, yycolumn, yytext());
+          { return symbol(sym.METODOS);
           }
         case 50: break;
         case 24: 
-          { return new Symbol(sym.FUNCION, yyline, yycolumn, yytext());
+          { return symbol(sym.FUNCION);
           }
         case 51: break;
         case 25: 
-          { return new Symbol(sym.VARIABLES, yyline, yycolumn, yytext());
+          { return symbol(sym.VARIABLES);
           }
         case 52: break;
         case 26: 
-          { return new Symbol(sym.PARAMETROS, yyline, yycolumn, yytext());
+          { return symbol(sym.PARAMETROS);
           }
         case 53: break;
         case 27: 
-          { return new Symbol(sym.COMENTARIOS, yyline, yycolumn, yytext());
+          { return symbol(sym.COMENTARIOS);
           }
         case 54: break;
         default: 

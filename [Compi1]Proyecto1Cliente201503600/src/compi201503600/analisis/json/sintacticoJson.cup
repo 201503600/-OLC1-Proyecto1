@@ -2,10 +2,19 @@ package compi201503600.analisis.json;
 
 import java_cup.runtime.*;
 import java.io.FileReader;
+import compi201503600.beans.*;
 
 //PARSER 
 parser code
 {://Codigo visible
+
+    public Result resultado = new Result();
+    public Variable v = null;
+    public Metodo m = null;
+
+    public Result getResult(){
+        return resultado;
+    }
 
     public void syntax_error(Symbol s){
         System.out.println("Error R de sintaxis: "+ s.value +" Linea "+(s.left+1)+" columna "+(s.right+1) );
@@ -67,8 +76,11 @@ action code
 
    Terminales que no tienen un valor son listados primero, los terminales que
    tienen un valor como los enteros son listados en la segunda o demas lineas. */
-terminal    LLAVEIZQ, LLAVEDER, CORCHIZQ, CORCHDER, DPUNTOS, COMA, SCORE, CLASES, VARIABLES, METODOS, COMENTARIOS, NOMBRE, TIPO, FUNCION, CLASE, PARAMETROS, 
-            TEXTO, ENTERO, DECIMAL, ID, CADENA;
+terminal Integer    ENTERO;
+terminal double     DECIMAL;  
+terminal String     CADENA, ID;
+terminal            LLAVEIZQ, LLAVEDER, CORCHIZQ, CORCHDER, DPUNTOS, COMA, SCORE, CLASES, VARIABLES, METODOS, COMENTARIOS, NOMBRE, TIPO, FUNCION, CLASE, PARAMETROS, 
+                    TEXTO;
    
 /* No terminales usados en la seccion gramatical. 
 
@@ -104,14 +116,18 @@ SENTSJSON ::=   SENTSJSON COMA SENTJSON
 
 SENTJSON ::=    SCORE DPUNTOS CORCHIZQ SENTSSCORE CORCHDER
                 | CLASES DPUNTOS CORCHIZQ SENTSCLASS CORCHDER
-                | VARIABLES DPUNTOS CORCHIZQ SENTSVARS CORCHDER
-                | METODOS DPUNTOS CORCHIZQ SENTSMETODOS CORCHDER
+                | VARIABLES DPUNTOS CORCHIZQ SENTSVARS CORCHDER                            
+                | METODOS DPUNTOS CORCHIZQ SENTSMETODOS CORCHDER                         
                 | COMENTARIOS DPUNTOS CORCHIZQ SENTSCOMMENTS CORCHDER
                 | error CORCHDER
                 ;
 
-SENTSSCORE ::=  ENTERO
-                | DECIMAL
+SENTSSCORE ::=  ENTERO:num      {:
+                                    parser.resultado.setScore((double)num);
+                                :}
+                | DECIMAL:num   {:
+                                    parser.resultado.setScore(num);
+                                :}
                 ;
 
 SENTSCLASS ::=  SENTSCLASES
@@ -122,7 +138,9 @@ SENTSCLASES ::= SENTSCLASES COMA SENTCLASES
                 | SENTCLASES
                 ;
 
-SENTCLASES ::=  LLAVEIZQ NOMBRE DPUNTOS CADENA LLAVEDER
+SENTCLASES ::=  LLAVEIZQ NOMBRE DPUNTOS CADENA:cad LLAVEDER {:
+                                                                parser.resultado.setClase(cad);
+                                                            :}
                 | error LLAVEDER
                 ;
 
@@ -134,7 +152,13 @@ SENTSVAR ::=    SENTSVAR COMA SENTVAR
                 | SENTVAR
                 ;
 
-SENTVAR ::= LLAVEIZQ PARAMSVAR LLAVEDER
+SENTVAR ::= LLAVEIZQ            {:
+                                    parser.v = new Variable();
+                                :} 
+            PARAMSVAR LLAVEDER  {:
+                                    parser.resultado.setVariable(parser.v);
+                                    parser.v = null;
+                                :}
             | error LLAVEDER
             ;
 
@@ -142,10 +166,10 @@ PARAMSVAR ::=   PARAMSVAR COMA PARAMVAR
                 | PARAMVAR
                 ;
 
-PARAMVAR ::=    NOMBRE DPUNTOS CADENA
-                | TIPO DPUNTOS CADENA
-                | FUNCION DPUNTOS CADENA
-                | CLASE DPUNTOS CADENA
+PARAMVAR ::=    NOMBRE DPUNTOS CADENA:nombre    {: parser.v.setNombre(nombre); :}
+                | TIPO DPUNTOS CADENA:tipo      {: parser.v.setTipo(tipo); :}
+                | FUNCION DPUNTOS CADENA:func   {: parser.v.setMetodo(func); :}
+                | CLASE DPUNTOS CADENA:clase    {: parser.v.setClase(clase); :}
                 ;
 
 SENTSMETODOS ::=    SENTSMET
@@ -156,7 +180,13 @@ SENTSMET ::=    SENTSMET COMA SENTMET
                 | SENTMET
                 ;
 
-SENTMET ::= LLAVEIZQ PARAMSMET LLAVEDER
+SENTMET ::= LLAVEIZQ                {:
+                                        parser.m = new Metodo();
+                                    :}
+            PARAMSMET LLAVEDER      {:
+                                        parser.resultado.setMetodo(parser.m);
+                                        parser.m = null;
+                                    :}
             | error LLAVEDER
             ;
 
@@ -164,9 +194,9 @@ PARAMSMET ::=   PARAMSMET COMA PARAMMET
                 | PARAMMET
                 ;
 
-PARAMMET ::=    NOMBRE DPUNTOS CADENA
-                | TIPO DPUNTOS CADENA
-                | PARAMETROS DPUNTOS CADENA
+PARAMMET ::=    NOMBRE DPUNTOS CADENA:nombre        {: parser.m.setNombre(nombre); :}
+                | TIPO DPUNTOS CADENA:tipo          {: parser.m.setTipo(tipo); :}
+                | PARAMETROS DPUNTOS CADENA:param   {: parser.m.setParametro(Integer.parseInt(param)); :}
                 ;
 
 SENTSCOMMENTS ::=   SENTSCOMMENT
@@ -177,6 +207,6 @@ SENTSCOMMENT ::=    SENTSCOMMENT COMA SENTCOMMENT
                     | SENTCOMMENT
                     ;
 
-SENTCOMMENT ::= LLAVEIZQ TEXTO DPUNTOS CADENA LLAVEDER
+SENTCOMMENT ::= LLAVEIZQ TEXTO DPUNTOS CADENA:comment LLAVEDER  {: parser.resultado.setComentario(comment); :}
                 | error LLAVEDER
                 ;
